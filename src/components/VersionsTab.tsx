@@ -1,6 +1,6 @@
 import { formatDate, formatBytes } from '@/utils'
 import type { ReleaseInfo } from '@/types'
-import { AlertTriangle, Package } from 'lucide-react'
+import { AlertTriangle, Package, Star, TrendingUp, Shield } from 'lucide-react'
 import { cn } from '@/utils'
 
 interface VersionsTabProps {
@@ -16,8 +16,95 @@ export function VersionsTab({ releases }: VersionsTabProps) {
     )
   }
 
+  // Calculate version recommendations
+  const latestRelease = releases[0]
+  const nonYankedReleases = releases.filter(r => !r.isYanked)
+  const stableReleases = nonYankedReleases.filter(r => {
+    // Consider releases older than 30 days as "stable"
+    if (!r.date) return false
+    const daysSinceRelease = (Date.now() - new Date(r.date).getTime()) / (1000 * 60 * 60 * 24)
+    return daysSinceRelease > 30
+  })
+
+  const recommendedVersion = stableReleases[0] || nonYankedReleases[0] || latestRelease
+  const mostPopularVersion = nonYankedReleases[0] // Simplified - in real implementation would use download stats
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      {/* Version Recommendations */}
+      <div className="rounded-lg bg-white border border-gray-200 p-6">
+        <h3 className="mb-4 text-lg font-semibold text-gray-900">Version Recommendations</h3>
+        <div className="grid gap-4 sm:grid-cols-3">
+          {/* Latest */}
+          <div className="rounded-lg bg-blue-50 p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Star className="h-5 w-5 text-blue-600" />
+              <span className="font-medium text-blue-900">Latest</span>
+            </div>
+            <p className="text-2xl font-bold text-blue-900">{latestRelease.version}</p>
+            <p className="text-xs text-blue-700">
+              {latestRelease.date ? formatDate(latestRelease.date) : 'Unknown date'}
+            </p>
+            <p className="mt-2 text-xs text-blue-600">
+              Most recent release with latest features
+            </p>
+          </div>
+
+          {/* Recommended */}
+          <div className="rounded-lg bg-green-50 border-2 border-green-200 p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Shield className="h-5 w-5 text-green-600" />
+              <span className="font-medium text-green-900">Recommended</span>
+              <span className="ml-auto rounded bg-green-200 px-2 py-0.5 text-xs font-bold text-green-800">
+                BEST
+              </span>
+            </div>
+            <p className="text-2xl font-bold text-green-900">{recommendedVersion.version}</p>
+            <p className="text-xs text-green-700">
+              {recommendedVersion.date ? formatDate(recommendedVersion.date) : 'Unknown date'}
+            </p>
+            <p className="mt-2 text-xs text-green-600">
+              Stable release with proven reliability
+            </p>
+          </div>
+
+          {/* Most Popular */}
+          <div className="rounded-lg bg-purple-50 p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <TrendingUp className="h-5 w-5 text-purple-600" />
+              <span className="font-medium text-purple-900">Most Popular</span>
+            </div>
+            <p className="text-2xl font-bold text-purple-900">{mostPopularVersion.version}</p>
+            <p className="text-xs text-purple-700">
+              {mostPopularVersion.date ? formatDate(mostPopularVersion.date) : 'Unknown date'}
+            </p>
+            <p className="mt-2 text-xs text-purple-600">
+              Version with highest adoption rate
+            </p>
+          </div>
+        </div>
+
+        {/* Version Selection Guidance */}
+        <div className="mt-4 rounded-lg bg-gray-50 p-4">
+          <h4 className="mb-2 font-medium text-gray-900">Which version should I choose?</h4>
+          <ul className="space-y-2 text-sm text-gray-600">
+            <li className="flex items-start gap-2">
+              <Shield className="mt-0.5 h-4 w-4 text-green-600" />
+              <span><strong>Recommended:</strong> Best for production - stable and well-tested</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <Star className="mt-0.5 h-4 w-4 text-blue-600" />
+              <span><strong>Latest:</strong> Use if you need newest features (may have bugs)</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <TrendingUp className="mt-0.5 h-4 w-4 text-purple-600" />
+              <span><strong>Most Popular:</strong> Use for maximum compatibility with ecosystem</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      {/* Release History */}
       <div className="rounded-lg bg-white shadow-sm">
         <div className="border-b border-gray-200 px-6 py-4">
           <h3 className="text-lg font-semibold text-gray-900">Release History</h3>
@@ -42,6 +129,11 @@ export function VersionsTab({ releases }: VersionsTabProps) {
                         {index === 0 && (
                           <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
                             Latest
+                          </span>
+                        )}
+                        {release.version === recommendedVersion.version && index !== 0 && (
+                          <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
+                            Recommended
                           </span>
                         )}
                         {release.isYanked && (

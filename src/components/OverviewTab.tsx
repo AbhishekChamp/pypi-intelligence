@@ -8,15 +8,20 @@ import {
   AlertTriangle,
   CheckCircle,
   Users,
+  Loader2,
 } from 'lucide-react'
 
 interface OverviewTabProps {
   overview: PackageOverview | null
   health: HealthScore
+  healthLoading?: boolean
 }
 
-export function OverviewTab({ overview, health }: OverviewTabProps) {
+export function OverviewTab({ overview, health, healthLoading = false }: OverviewTabProps) {
   if (!overview) return null
+
+  // Check if health is still being computed (score is 0 and no meaningful data yet)
+  const isHealthLoading = healthLoading || (health.score === 0 && health.breakdown.popularity === 0)
 
   return (
     <div className="space-y-6">
@@ -28,19 +33,26 @@ export function OverviewTab({ overview, health }: OverviewTabProps) {
             <p className="mt-1 text-lg text-gray-600">{overview.summary}</p>
           </div>
           <div className="flex items-center gap-2">
-            <span
-              className={cn(
-                'rounded-full px-3 py-1 text-sm font-medium',
-                health.rating === 'excellent' && 'bg-green-100 text-green-800',
-                health.rating === 'good' && 'bg-blue-100 text-blue-800',
-                health.rating === 'fair' && 'bg-yellow-100 text-yellow-800',
-                health.rating === 'poor' && 'bg-red-100 text-red-800'
-              )}
-            >
-              {health.rating === 'excellent' && <CheckCircle className="mr-1 inline h-4 w-4" />}
-              {health.rating === 'poor' && <AlertTriangle className="mr-1 inline h-4 w-4" />}
-              Health: {health.score}/100
-            </span>
+            {isHealthLoading ? (
+              <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-600">
+                <Loader2 className="mr-1 inline h-4 w-4 animate-spin" />
+                Computing Health...
+              </span>
+            ) : (
+              <span
+                className={cn(
+                  'rounded-full px-3 py-1 text-sm font-medium',
+                  health.rating === 'excellent' && 'bg-green-100 text-green-800',
+                  health.rating === 'good' && 'bg-blue-100 text-blue-800',
+                  health.rating === 'fair' && 'bg-yellow-100 text-yellow-800',
+                  health.rating === 'poor' && 'bg-red-100 text-red-800'
+                )}
+              >
+                {health.rating === 'excellent' && <CheckCircle className="mr-1 inline h-4 w-4" />}
+                {health.rating === 'poor' && <AlertTriangle className="mr-1 inline h-4 w-4" />}
+                Health: {health.score}/100
+              </span>
+            )}
             <span className="rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-800">
               v{overview.version}
             </span>
@@ -107,7 +119,7 @@ export function OverviewTab({ overview, health }: OverviewTabProps) {
       )}
 
       {/* Warnings & Recommendations */}
-      {(health.warnings.length > 0 || health.recommendations.length > 0) && (
+      {!isHealthLoading && (health.warnings.length > 0 || health.recommendations.length > 0) && (
         <div className="grid gap-4 sm:grid-cols-2">
           {health.warnings.length > 0 && (
             <div className="rounded-lg bg-yellow-50 p-4">

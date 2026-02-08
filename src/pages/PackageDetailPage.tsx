@@ -8,6 +8,7 @@ import {
   useDownloadStats,
   useHealthScore,
 } from '@/hooks'
+import { usePackageSuggestions } from '@/hooks/usePackageSuggestions'
 import { Layout } from '@/components/Layout'
 import { Tabs } from '@/components/Tabs'
 import { SearchInput } from '@/components/SearchInput'
@@ -17,6 +18,9 @@ import { VersionsTab } from '@/components/VersionsTab'
 import { CompatibilityTab } from '@/components/CompatibilityTab'
 import { DownloadsTab } from '@/components/DownloadsTab'
 import { HealthTab } from '@/components/HealthTab'
+import { InstallationTab } from '@/components/InstallationTab'
+import { SecurityTab } from '@/components/SecurityTab'
+import { DependenciesTab } from '@/components/DependenciesTab'
 import type { TabId } from '@/types'
 import { ArrowLeft, GitCompare } from 'lucide-react'
 
@@ -31,6 +35,9 @@ export function PackageDetailPage() {
   const { stats, loading: statsLoading } = useDownloadStats(packageName || null)
   const health = useHealthScore(overview, compatibility, stats)
 
+  // Compute suggestions when package loads
+  usePackageSuggestions(packageName || null)
+
   const handleSearch = (query: string) => {
     window.location.href = `/package/${query}`
   }
@@ -44,7 +51,11 @@ export function PackageDetailPage() {
         </div>
 
         {error ? (
-          <ErrorDisplay error={error} />
+          <ErrorDisplay 
+            error={error} 
+            packageName={packageName}
+            onSuggestionClick={(suggestion) => window.location.href = `/package/${suggestion}`}
+          />
         ) : (
           <div className="space-y-6">
             {/* Back Link & Compare */}
@@ -73,16 +84,39 @@ export function PackageDetailPage() {
             {/* Tab Content */}
             <div className="py-4">
               {activeTab === 'overview' && (
-                <OverviewTab overview={overview} health={health} />
+                <OverviewTab 
+                  overview={overview} 
+                  health={health} 
+                  healthLoading={packageLoading || statsLoading}
+                />
               )}
               {activeTab === 'versions' && <VersionsTab releases={releases} />}
+              {activeTab === 'dependencies' && (
+                <DependenciesTab 
+                  packageName={packageName || ''} 
+                  version={data?.info.version}
+                  onPackageClick={(name) => window.location.href = `/package/${name}`}
+                />
+              )}
+              {activeTab === 'security' && (
+                <SecurityTab 
+                  packageName={packageName || ''} 
+                  version={data?.info.version}
+                />
+              )}
               {activeTab === 'compatibility' && (
                 <CompatibilityTab compatibility={compatibility} />
               )}
               {activeTab === 'downloads' && (
                 <DownloadsTab stats={stats} loading={statsLoading} />
               )}
-              {activeTab === 'health' && <HealthTab health={health} />}
+              {activeTab === 'health' && (
+                <HealthTab 
+                  health={health} 
+                  loading={packageLoading || statsLoading}
+                />
+              )}
+              {activeTab === 'install' && <InstallationTab data={data} />}
             </div>
           </div>
         )}

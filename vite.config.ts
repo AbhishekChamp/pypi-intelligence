@@ -13,6 +13,13 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true,
+    proxy: {
+      '/api/pypistats': {
+        target: 'https://pypistats.org',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/pypistats/, '/api'),
+      },
+    },
   },
   build: {
     outDir: 'dist',

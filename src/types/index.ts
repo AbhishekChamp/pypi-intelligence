@@ -16,6 +16,8 @@ export interface PackageInfo {
   maintainer: string | null
   maintainer_email: string | null
   license: string | null
+  license_expression: string | null
+  license_files: string[] | null
   keywords: string | null
   classifiers: string[]
   platform: string | null
@@ -155,4 +157,4 @@ export interface PackageComparison {
   downloads: [DownloadStats, DownloadStats]
 }
 
-export type TabId = 'overview' | 'versions' | 'compatibility' | 'downloads' | 'health'
+export type TabId = 'overview' | 'versions' | 'dependencies' | 'security' | 'compatibility' | 'downloads' | 'health' | 'install'

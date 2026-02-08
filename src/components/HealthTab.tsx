@@ -8,13 +8,39 @@ import {
   Shield,
   CheckCircle,
   AlertTriangle,
+  Activity,
 } from 'lucide-react'
 
 interface HealthTabProps {
   health: HealthScore
+  loading?: boolean
 }
 
-export function HealthTab({ health }: HealthTabProps) {
+export function HealthTab({ health, loading = false }: HealthTabProps) {
+  // Show loading state while computing health
+  if (loading) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="text-center">
+          <div className="relative mx-auto mb-6 h-24 w-24">
+            <Activity className="h-24 w-24 animate-pulse text-blue-500" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="h-16 w-16 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600" />
+            </div>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900">Computing Health Score...</h3>
+          <p className="mt-2 text-sm text-gray-600">
+            Analyzing package metrics, download trends, and compatibility
+          </p>
+          <div className="mt-4 flex justify-center gap-2">
+            <span className="h-2 w-2 animate-bounce rounded-full bg-blue-600 [animation-delay:0ms]" />
+            <span className="h-2 w-2 animate-bounce rounded-full bg-blue-600 [animation-delay:150ms]" />
+            <span className="h-2 w-2 animate-bounce rounded-full bg-blue-600 [animation-delay:300ms]" />
+          </div>
+        </div>
+      </div>
+    )
+  }
   const scoreColor =
     health.rating === 'excellent'
       ? 'text-green-600'

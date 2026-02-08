@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { Layout } from '@/components/Layout'
 import { SearchInput } from '@/components/SearchInput'
 import { ErrorDisplay } from '@/components/ErrorDisplay'
+import { PackageSuggestions } from '@/components/PackageSuggestions'
 import {
   usePackageData,
   usePackageOverview,
@@ -21,6 +22,7 @@ import {
   Container,
   Apple,
   Monitor,
+  Loader2,
 } from 'lucide-react'
 
 export function ComparePage() {
@@ -41,7 +43,7 @@ export function ComparePage() {
         <h1 className="mb-6 text-2xl font-bold text-gray-900">Compare Packages</h1>
 
         {/* Search Inputs */}
-        <div className="mb-8 grid gap-4 sm:grid-cols-2">
+        <div className="mb-4 grid gap-4 sm:grid-cols-2">
           <div>
             <label className="mb-2 block text-sm font-medium text-gray-700">Package 1</label>
             <SearchInput
@@ -58,6 +60,16 @@ export function ComparePage() {
           </div>
         </div>
 
+        {/* Suggestions - shown outside the grid to avoid layout issues */}
+        {p1 && !p2 && (
+          <div className="mb-6">
+            <PackageSuggestions
+              packageName={p1}
+              onSelectSuggestion={setP2}
+            />
+          </div>
+        )}
+
         {/* Comparison Results */}
         {(p1 || p2) && (
           <div className="grid gap-4 lg:grid-cols-2">
@@ -71,13 +83,16 @@ export function ComparePage() {
 }
 
 function PackageComparisonCard({ packageName }: { packageName: string }) {
-  const { data, loading, error } = usePackageData(packageName)
+  const { data, loading: packageLoading, error } = usePackageData(packageName)
   const overview = usePackageOverview(data)
   const compatibility = useCompatibilityMatrix(data)
-  const { stats } = useDownloadStats(packageName)
+  const { stats, loading: statsLoading } = useDownloadStats(packageName)
   const health = useHealthScore(overview, compatibility, stats)
 
-  if (loading) {
+  // Check if health is still being computed
+  const isHealthLoading = packageLoading || statsLoading || (health.score === 0 && health.breakdown.popularity === 0)
+
+  if (packageLoading) {
     return (
       <div className="h-96 animate-pulse rounded-lg bg-gray-200" />
     )
@@ -100,29 +115,40 @@ function PackageComparisonCard({ packageName }: { packageName: string }) {
       <div className="mb-4">
         <div className="mb-2 flex items-center justify-between">
           <span className="text-sm font-medium text-gray-700">Health Score</span>
-          <span
-            className={cn(
-              'text-lg font-bold',
-              health.rating === 'excellent' && 'text-green-600',
-              health.rating === 'good' && 'text-blue-600',
-              health.rating === 'fair' && 'text-yellow-600',
-              health.rating === 'poor' && 'text-red-600'
-            )}
-          >
-            {health.score}/100
-          </span>
+          {isHealthLoading ? (
+            <span className="inline-flex items-center text-sm text-gray-500">
+              <Loader2 className="mr-1 inline h-4 w-4 animate-spin" />
+              Computing...
+            </span>
+          ) : (
+            <span
+              className={cn(
+                'text-lg font-bold',
+                health.rating === 'excellent' && 'text-green-600',
+                health.rating === 'good' && 'text-blue-600',
+                health.rating === 'fair' && 'text-yellow-600',
+                health.rating === 'poor' && 'text-red-600'
+              )}
+            >
+              {health.score}/100
+            </span>
+          )}
         </div>
         <div className="h-2 rounded-full bg-gray-200">
-          <div
-            className={cn(
-              'h-full rounded-full',
-              health.rating === 'excellent' && 'bg-green-500',
-              health.rating === 'good' && 'bg-blue-500',
-              health.rating === 'fair' && 'bg-yellow-500',
-              health.rating === 'poor' && 'bg-red-500'
-            )}
-            style={{ width: `${health.score}%` }}
-          />
+          {isHealthLoading ? (
+            <div className="h-full w-full animate-pulse rounded-full bg-gray-300" />
+          ) : (
+            <div
+              className={cn(
+                'h-full rounded-full',
+                health.rating === 'excellent' && 'bg-green-500',
+                health.rating === 'good' && 'bg-blue-500',
+                health.rating === 'fair' && 'bg-yellow-500',
+                health.rating === 'poor' && 'bg-red-500'
+              )}
+              style={{ width: `${health.score}%` }}
+            />
+          )}
         </div>
       </div>
 
@@ -161,7 +187,7 @@ function PackageComparisonCard({ packageName }: { packageName: string }) {
       </div>
 
       {/* Warnings */}
-      {health.warnings.length > 0 && (
+      {!isHealthLoading && health.warnings.length > 0 && (
         <div className="rounded-md bg-yellow-50 p-3">
           <div className="mb-1 flex items-center gap-1">
             <AlertTriangle className="h-4 w-4 text-yellow-600" />

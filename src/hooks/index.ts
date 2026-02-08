@@ -14,6 +14,7 @@ import {
   parsePythonVersion,
   calculateTrendPercentage,
   formatLicense,
+  isValidDate,
 } from '@/utils'
 
 // Hook for fetching package data
@@ -89,12 +90,27 @@ export function usePackageOverview(
   // Find the most recent upload across all releases
   let lastReleaseDate: Date | null = null
   
+  // Helper to safely parse date
+  const safeParseDate = (dateStr: string): Date | null => {
+    try {
+      const date = new Date(dateStr)
+      if (isValidDate(date)) {
+        return date
+      }
+      console.warn('Invalid date string:', dateStr)
+      return null
+    } catch (error) {
+      console.warn('Error parsing date:', dateStr, error)
+      return null
+    }
+  }
+  
   // First, try to find files matching the current version (info.version)
   const currentVersionFiles = data.releases[info.version]
   if (currentVersionFiles && currentVersionFiles.length > 0) {
     const latestFile = currentVersionFiles[currentVersionFiles.length - 1]
     if (latestFile?.upload_time) {
-      lastReleaseDate = new Date(latestFile.upload_time)
+      lastReleaseDate = safeParseDate(latestFile.upload_time)
     }
   }
   
@@ -103,8 +119,8 @@ export function usePackageOverview(
     Object.values(data.releases).forEach(files => {
       files.forEach(file => {
         if (file.upload_time) {
-          const uploadDate = new Date(file.upload_time)
-          if (!lastReleaseDate || uploadDate > lastReleaseDate) {
+          const uploadDate = safeParseDate(file.upload_time)
+          if (uploadDate && (!lastReleaseDate || uploadDate > lastReleaseDate)) {
             lastReleaseDate = uploadDate
           }
         }
@@ -130,7 +146,7 @@ export function usePackageOverview(
     version: info.version,
     summary: info.summary || 'No summary available',
     description: info.description || '',
-    license: formatLicense(info.license),
+    license: formatLicense(info.license, info.license_expression, info.classifiers),
     author: authorName,
     maintainer: info.maintainer,
     maintainerCount,
@@ -144,21 +160,45 @@ export function usePackageOverview(
 export function useReleaseHistory(data: PyPIPackage | null): ReleaseInfo[] {
   if (!data) return []
 
+  // Helper to safely parse date
+  const safeParseDate = (dateStr: string): Date | null => {
+    try {
+      const date = new Date(dateStr)
+      if (isValidDate(date)) {
+        return date
+      }
+      return null
+    } catch {
+      return null
+    }
+  }
+
   return Object.entries(data.releases)
     .map(([version, files]) => {
       const latestFile = files[files.length - 1]
       const isYanked = files.some(f => f.yanked) || false
       const yankedReason = files.find(f => f.yanked)?.yanked_reason || null
 
+      // Safely parse the date
+      let parsedDate: Date | null = null
+      if (latestFile?.upload_time) {
+        parsedDate = safeParseDate(latestFile.upload_time)
+        if (!parsedDate) {
+          console.warn(`Invalid upload_time for ${version}:`, latestFile.upload_time)
+        }
+      }
+
       return {
         version,
-        date: latestFile?.upload_time ? new Date(latestFile.upload_time) : null,
+        date: parsedDate,
         isYanked,
         yankedReason,
         files,
       }
     })
     .sort((a, b) => {
+      // Handle null dates - put them at the end
+      if (!a.date && !b.date) return 0
       if (!a.date) return 1
       if (!b.date) return -1
       return b.date.getTime() - a.date.getTime()
@@ -424,29 +464,117 @@ export function useHealthScore(
   }
 }
 
-// Hook for local storage
+// Check if localStorage is available
+function isLocalStorageAvailable(): boolean {
+  try {
+    const test = '__storage_test__'
+    window.localStorage.setItem(test, test)
+    window.localStorage.removeItem(test)
+    return true
+  } catch {
+    return false
+  }
+}
+
+// Hook for local storage with proper error handling
 export function useLocalStorage<T>(key: string, initialValue: T) {
+  const [storageAvailable] = useState(() => isLocalStorageAvailable())
+  const [storageError, setStorageError] = useState<string | null>(null)
+  
   const [storedValue, setStoredValue] = useState<T>(() => {
+    if (!storageAvailable) {
+      console.warn('localStorage is not available. Data will not persist.')
+      return initialValue
+    }
+    
     try {
       const item = window.localStorage.getItem(key)
-      return item ? (JSON.parse(item) as T) : initialValue
-    } catch {
+      if (item) {
+        try {
+          return JSON.parse(item) as T
+        } catch (parseError) {
+          console.warn(`Error parsing localStorage key "${key}":`, parseError)
+          // Clear corrupted data
+          window.localStorage.removeItem(key)
+          return initialValue
+        }
+      }
+      return initialValue
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error'
+      console.warn(`Error reading localStorage key "${key}":`, errorMsg)
+      setStorageError(`Unable to load saved data: ${errorMsg}`)
       return initialValue
     }
   })
 
   const setValue = useCallback(
     (value: T | ((val: T) => T)) => {
+      if (!storageAvailable) {
+        console.warn('Cannot save to localStorage: storage is not available')
+        setStorageError('Cannot save preferences: private browsing mode or storage disabled')
+        // Still update state even if storage fails
+        const valueToStore = value instanceof Function ? value(storedValue) : value
+        setStoredValue(valueToStore)
+        return
+      }
+
       try {
         const valueToStore = value instanceof Function ? value(storedValue) : value
         setStoredValue(valueToStore)
-        window.localStorage.setItem(key, JSON.stringify(valueToStore))
-      } catch {
-        console.warn(`Error saving to localStorage: ${key}`)
+        
+        const serialized = JSON.stringify(valueToStore)
+        
+        // Check storage quota
+        try {
+          window.localStorage.setItem(key, serialized)
+          setStorageError(null) // Clear any previous error
+        } catch (quotaError) {
+          if (quotaError instanceof Error && quotaError.name === 'QuotaExceededError') {
+            console.error(`localStorage quota exceeded for key "${key}"`)
+            setStorageError('Storage is full. Some preferences may not be saved.')
+            
+            // Try to clear old items to make space
+            try {
+              const keysToRemove = []
+              for (let i = 0; i < window.localStorage.length; i++) {
+                const k = window.localStorage.key(i)
+                if (k && k.startsWith('pypi-intelligence:') && k !== key) {
+                  keysToRemove.push(k)
+                }
+              }
+              // Remove oldest items (up to 5)
+              keysToRemove.slice(0, 5).forEach(k => window.localStorage.removeItem(k))
+              
+              // Try again
+              window.localStorage.setItem(key, serialized)
+              setStorageError(null)
+            } catch {
+              setStorageError('Storage is full. Please clear some browser data.')
+            }
+          } else {
+            throw quotaError
+          }
+        }
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : 'Unknown error'
+        console.error(`Error saving to localStorage key "${key}":`, errorMsg)
+        setStorageError(`Failed to save: ${errorMsg}`)
       }
     },
-    [key, storedValue]
+    [key, storedValue, storageAvailable]
   )
 
-  return [storedValue, setValue] as const
+  const clearValue = useCallback(() => {
+    if (storageAvailable) {
+      try {
+        window.localStorage.removeItem(key)
+      } catch (error) {
+        console.warn(`Error clearing localStorage key "${key}":`, error)
+      }
+    }
+    setStoredValue(initialValue)
+  }, [key, initialValue, storageAvailable])
+
+  return [storedValue, setValue, clearValue, storageError, storageAvailable] as const
 }

@@ -4,9 +4,12 @@ import type { TabId } from '@/types'
 const tabs: { id: TabId; label: string }[] = [
   { id: 'overview', label: 'Overview' },
   { id: 'versions', label: 'Versions' },
+  { id: 'dependencies', label: 'Dependencies' },
+  { id: 'security', label: 'Security' },
   { id: 'compatibility', label: 'Compatibility' },
   { id: 'downloads', label: 'Downloads' },
   { id: 'health', label: 'Health' },
+  { id: 'install', label: 'Install' },
 ]
 
 interface TabsProps {
