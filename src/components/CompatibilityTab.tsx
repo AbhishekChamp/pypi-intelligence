@@ -41,32 +41,33 @@ export function CompatibilityTab({ compatibility }: CompatibilityTabProps) {
       </div>
 
       {/* Python Versions */}
-      <div className="rounded-lg bg-white p-6 shadow-sm">
+      <div className="rounded-lg p-6 shadow-sm" style={{ backgroundColor: 'var(--card-bg)' }}>
         <div className="mb-4 flex items-center gap-2">
-          <Cpu className="h-5 w-5 text-gray-400" />
-          <h3 className="text-lg font-semibold text-gray-900">Python Versions</h3>
+          <Cpu className="h-5 w-5" style={{ color: 'var(--text-muted)' }} />
+          <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Python Versions</h3>
         </div>
         {compatibility.pythonVersions.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {compatibility.pythonVersions.map(version => (
               <span
                 key={version}
-                className="rounded-md bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700"
+                className="rounded-md px-3 py-1 text-sm font-medium"
+                style={{ backgroundColor: 'var(--accent-light)', color: 'var(--accent)' }}
               >
                 Python {version}
               </span>
             ))}
           </div>
         ) : (
-          <p className="text-gray-500">No Python version classifiers found</p>
+          <p style={{ color: 'var(--text-muted)' }}>No Python version classifiers found</p>
         )}
       </div>
 
       {/* Platform Matrix */}
-      <div className="rounded-lg bg-white p-6 shadow-sm">
+      <div className="rounded-lg p-6 shadow-sm" style={{ backgroundColor: 'var(--card-bg)' }}>
         <div className="mb-4 flex items-center gap-2">
-          <Monitor className="h-5 w-5 text-gray-400" />
-          <h3 className="text-lg font-semibold text-gray-900">Platform Support</h3>
+          <Monitor className="h-5 w-5" style={{ color: 'var(--text-muted)' }} />
+          <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Platform Support</h3>
         </div>
         <div className="grid gap-4 sm:grid-cols-3">
           <PlatformCard

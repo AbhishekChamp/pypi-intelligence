@@ -101,7 +101,7 @@ export function SecurityTab({ packageName, version }: SecurityTabProps) {
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
           <Shield className="mx-auto mb-4 h-12 w-12 animate-pulse text-blue-500" />
-          <p className="text-gray-600">Checking for security vulnerabilities...</p>
+          <p style={{ color: 'var(--text-secondary)' }}>Checking for security vulnerabilities...</p>
         </div>
       </div>
     )
@@ -204,23 +204,25 @@ export function SecurityTab({ packageName, version }: SecurityTabProps) {
       {/* Vulnerabilities List */}
       {totalVulns > 0 && (
         <div className="space-y-4">
-          <h4 className="text-lg font-semibold text-gray-900">Vulnerability Details</h4>
+          <h4 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Vulnerability Details</h4>
           
           {(Object.keys(groupedVulns) as SeverityLevel[]).map(severity => 
             groupedVulns[severity].map(vuln => (
               <div 
                 key={vuln.id}
-                className="rounded-lg border border-gray-200 bg-white overflow-hidden"
+                className="rounded-lg overflow-hidden"
+                style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)', borderWidth: '1px' }}
               >
                 <button
                   onClick={() => toggleExpand(vuln.id)}
-                  className="flex w-full items-center justify-between p-4 text-left hover:bg-gray-50"
+                  className="flex w-full items-center justify-between p-4 text-left hover:opacity-90"
+                  style={{ backgroundColor: 'var(--card-bg)' }}
                 >
                   <div className="flex items-center gap-3">
                     <span className={cn('rounded px-2 py-1 text-xs font-bold', getSeverityColor(severity))}>
                       {severity}
                     </span>
-                    <span className="font-mono text-sm text-gray-600">{vuln.id}</span>
+                    <span className="font-mono text-sm" style={{ color: 'var(--text-secondary)' }}>{vuln.id}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <a
@@ -228,30 +230,31 @@ export function SecurityTab({ packageName, version }: SecurityTabProps) {
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
-                      className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
+                      className="flex items-center gap-1 text-sm hover:underline"
+                      style={{ color: 'var(--accent)' }}
                     >
                       View on OSV
                       <ExternalLink className="h-3 w-3" />
                     </a>
                     {expandedVulns.has(vuln.id) ? (
-                      <ChevronUp className="h-5 w-5 text-gray-400" />
+                      <ChevronUp className="h-5 w-5" style={{ color: 'var(--text-muted)' }} />
                     ) : (
-                      <ChevronDown className="h-5 w-5 text-gray-400" />
+                      <ChevronDown className="h-5 w-5" style={{ color: 'var(--text-muted)' }} />
                     )}
                   </div>
                 </button>
                 
                 {expandedVulns.has(vuln.id) && (
-                  <div className="border-t border-gray-200 p-4">
-                    <h5 className="mb-2 font-semibold text-gray-900">{vuln.summary}</h5>
-                    <p className="mb-4 text-sm text-gray-600">{vuln.details}</p>
+                  <div className="border-t p-4" style={{ borderColor: 'var(--border)' }}>
+                    <h5 className="mb-2 font-semibold" style={{ color: 'var(--text-primary)' }}>{vuln.summary}</h5>
+                    <p className="mb-4 text-sm" style={{ color: 'var(--text-secondary)' }}>{vuln.details}</p>
                     
                     {vuln.aliases && vuln.aliases.length > 0 && (
                       <div className="mb-3">
-                        <span className="text-xs font-medium text-gray-500">Also known as:</span>
+                        <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>Also known as:</span>
                         <div className="mt-1 flex flex-wrap gap-1">
                           {vuln.aliases.map(alias => (
-                            <span key={alias} className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-600">
+                            <span key={alias} className="rounded px-2 py-1 text-xs" style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}>
                               {alias}
                             </span>
                           ))}
@@ -261,15 +264,15 @@ export function SecurityTab({ packageName, version }: SecurityTabProps) {
                     
                     {vuln.affected && vuln.affected.length > 0 && (
                       <div>
-                        <span className="text-xs font-medium text-gray-500">Affected versions:</span>
+                        <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>Affected versions:</span>
                         <div className="mt-1 flex flex-wrap gap-1">
                           {vuln.affected[0].versions?.slice(0, 10).map(v => (
-                            <span key={v} className="rounded bg-red-50 px-2 py-1 text-xs text-red-700">
+                            <span key={v} className="rounded px-2 py-1 text-xs" style={{ backgroundColor: 'var(--error-light)', color: 'var(--error)' }}>
                               {v}
                             </span>
                           ))}
                           {vuln.affected[0].versions && vuln.affected[0].versions.length > 10 && (
-                            <span className="text-xs text-gray-500">
+                            <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
                               +{vuln.affected[0].versions.length - 10} more
                             </span>
                           )}
@@ -277,7 +280,7 @@ export function SecurityTab({ packageName, version }: SecurityTabProps) {
                       </div>
                     )}
                     
-                    <div className="mt-3 text-xs text-gray-500">
+                    <div className="mt-3 text-xs" style={{ color: 'var(--text-muted)' }}>
                       Published: {new Date(vuln.published).toLocaleDateString()}
                       {vuln.modified && (
                         <span className="ml-3">
@@ -294,16 +297,17 @@ export function SecurityTab({ packageName, version }: SecurityTabProps) {
       )}
 
       {/* Data Source Info */}
-      <div className="rounded-lg bg-gray-50 p-4">
+      <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
         <div className="flex items-center gap-2">
-          <Shield className="h-4 w-4 text-gray-500" />
-          <span className="text-sm text-gray-600">
+          <Shield className="h-4 w-4" style={{ color: 'var(--text-muted)' }} />
+          <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
             Security data provided by{' '}
             <a 
               href="https://osv.dev" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-blue-600 hover:underline"
+              className="hover:underline"
+              style={{ color: 'var(--accent)' }}
             >
               OSV (Open Source Vulnerabilities)
             </a>

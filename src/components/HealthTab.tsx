@@ -23,19 +23,19 @@ export function HealthTab({ health, loading = false }: HealthTabProps) {
       <div className="flex min-h-[400px] items-center justify-center">
         <div className="text-center">
           <div className="relative mx-auto mb-6 h-24 w-24">
-            <Activity className="h-24 w-24 animate-pulse text-blue-500" />
+            <Activity className="h-24 w-24 animate-pulse" style={{ color: 'var(--accent)' }} />
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="h-16 w-16 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600" />
+              <div className="h-16 w-16 animate-spin rounded-full border-4" style={{ borderColor: 'var(--accent-light)', borderTopColor: 'var(--accent)' }} />
             </div>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900">Computing Health Score...</h3>
-          <p className="mt-2 text-sm text-gray-600">
+          <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Computing Health Score...</h3>
+          <p className="mt-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
             Analyzing package metrics, download trends, and compatibility
           </p>
           <div className="mt-4 flex justify-center gap-2">
-            <span className="h-2 w-2 animate-bounce rounded-full bg-blue-600 [animation-delay:0ms]" />
-            <span className="h-2 w-2 animate-bounce rounded-full bg-blue-600 [animation-delay:150ms]" />
-            <span className="h-2 w-2 animate-bounce rounded-full bg-blue-600 [animation-delay:300ms]" />
+            <span className="h-2 w-2 animate-bounce rounded-full" style={{ backgroundColor: 'var(--accent)', animationDelay: '0ms' }} />
+            <span className="h-2 w-2 animate-bounce rounded-full" style={{ backgroundColor: 'var(--accent)', animationDelay: '150ms' }} />
+            <span className="h-2 w-2 animate-bounce rounded-full" style={{ backgroundColor: 'var(--accent)', animationDelay: '300ms' }} />
           </div>
         </div>
       </div>
@@ -62,12 +62,12 @@ export function HealthTab({ health, loading = false }: HealthTabProps) {
   return (
     <div className="space-y-6">
       {/* Overall Score */}
-      <div className={cn('rounded-xl p-8 text-center', scoreBg)}>
-        <div className="mb-4 inline-flex h-32 w-32 items-center justify-center rounded-full bg-white shadow-lg">
-          <span className={cn('text-5xl font-bold', scoreColor)}>{health.score}</span>
+      <div className={cn('rounded-xl p-8 text-center')} style={{ backgroundColor: scoreBg === 'bg-green-100' ? 'var(--success-light)' : scoreBg === 'bg-blue-100' ? 'var(--accent-light)' : scoreBg === 'bg-yellow-100' ? 'var(--warning-light)' : 'var(--error-light)' }}>
+        <div className="mb-4 inline-flex h-32 w-32 items-center justify-center rounded-full shadow-lg" style={{ backgroundColor: 'var(--card-bg)' }}>
+          <span className={cn('text-5xl font-bold')} style={{ color: scoreColor === 'text-green-600' ? 'var(--success)' : scoreColor === 'text-blue-600' ? 'var(--accent)' : scoreColor === 'text-yellow-600' ? 'var(--warning)' : 'var(--error)' }}>{health.score}</span>
         </div>
-        <h3 className={cn('text-2xl font-bold capitalize', scoreColor)}>{health.rating}</h3>
-        <p className="mt-2 text-gray-600">
+        <h3 className={cn('text-2xl font-bold capitalize')} style={{ color: scoreColor === 'text-green-600' ? 'var(--success)' : scoreColor === 'text-blue-600' ? 'var(--accent)' : scoreColor === 'text-yellow-600' ? 'var(--warning)' : 'var(--error)' }}>{health.rating}</h3>
+        <p className="mt-2" style={{ color: 'var(--text-secondary)' }}>
           {health.rating === 'excellent' && 'This package is production-ready with excellent metrics'}
           {health.rating === 'good' && 'This package is suitable for production use'}
           {health.rating === 'fair' && 'This package has some concerns - review before use'}
@@ -76,8 +76,8 @@ export function HealthTab({ health, loading = false }: HealthTabProps) {
       </div>
 
       {/* Score Breakdown */}
-      <div className="rounded-lg bg-white p-6 shadow-sm">
-        <h3 className="mb-4 text-lg font-semibold text-gray-900">Score Breakdown</h3>
+      <div className="rounded-lg p-6 shadow-sm" style={{ backgroundColor: 'var(--card-bg)' }}>
+        <h3 className="mb-4 text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Score Breakdown</h3>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <ScoreItem
             icon={<Clock className="h-5 w-5" />}
@@ -154,24 +154,24 @@ export function HealthTab({ health, loading = false }: HealthTabProps) {
       )}
 
       {/* Rating Legend */}
-      <div className="rounded-lg bg-gray-50 p-4">
-        <h4 className="mb-3 text-sm font-medium text-gray-700">Rating Scale</h4>
+      <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
+        <h4 className="mb-3 text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Rating Scale</h4>
         <div className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
           <div className="flex items-center gap-2">
             <div className="h-3 w-3 rounded-full bg-green-500" />
-            <span className="text-gray-800">85-100: Excellent</span>
+            <span style={{ color: 'var(--text-primary)' }}>85-100: Excellent</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="h-3 w-3 rounded-full bg-blue-500" />
-            <span className="text-gray-800">70-84: Good</span>
+            <span style={{ color: 'var(--text-primary)' }}>70-84: Good</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="h-3 w-3 rounded-full bg-yellow-500" />
-            <span className="text-gray-800">50-69: Fair</span>
+            <span style={{ color: 'var(--text-primary)' }}>50-69: Fair</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="h-3 w-3 rounded-full bg-red-500" />
-            <span className="text-gray-800">0-49: Poor</span>
+            <span style={{ color: 'var(--text-primary)' }}>0-49: Poor</span>
           </div>
         </div>
       </div>
@@ -195,33 +195,31 @@ function ScoreItem({
   const percentage = (score / max) * 100
   const color =
     percentage >= 80 ? 'bg-green-500' : percentage >= 60 ? 'bg-blue-500' : 'bg-yellow-500'
+  const colorVar =
+    percentage >= 80 ? 'var(--success)' : percentage >= 60 ? 'var(--accent)' : 'var(--warning)'
 
   return (
-    <div className="rounded-lg border border-gray-200 p-4">
-      <div className="mb-2 flex items-center gap-2 text-gray-500">
+    <div className="rounded-lg p-4" style={{ borderColor: 'var(--border)', borderWidth: '1px' }}>
+      <div className="mb-2 flex items-center gap-2" style={{ color: 'var(--text-muted)' }}>
         {icon}
         <span className="text-sm font-medium">{label}</span>
       </div>
       <div className="mb-1 flex items-baseline gap-1">
         <span
-          className={cn(
-            'text-2xl font-bold',
-            percentage >= 80 && 'text-green-600',
-            percentage >= 60 && percentage < 80 && 'text-blue-600',
-            percentage < 60 && 'text-yellow-600'
-          )}
+          className={cn('text-2xl font-bold')}
+          style={{ color: colorVar }}
         >
           {score}
         </span>
-        <span className="text-sm text-gray-400">/{max}</span>
+        <span className="text-sm" style={{ color: 'var(--text-muted)' }}>/{max}</span>
       </div>
-      <div className="mb-2 h-2 rounded-full bg-gray-200">
+      <div className="mb-2 h-2 rounded-full" style={{ backgroundColor: 'var(--border)' }}>
         <div
           className={cn('h-full rounded-full transition-all duration-500', color)}
           style={{ width: `${percentage}%` }}
         />
       </div>
-      <p className="text-xs text-gray-500">{description}</p>
+      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{description}</p>
     </div>
   )
 }

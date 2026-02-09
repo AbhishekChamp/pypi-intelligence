@@ -21,9 +21,9 @@ export function InstallationTab({ data }: InstallationTabProps) {
 
   if (!data) {
     return (
-      <div className="rounded-lg bg-gray-50 p-8 text-center">
-        <Package className="mx-auto mb-4 h-12 w-12 text-gray-400" />
-        <p className="text-gray-600">No installation information available</p>
+      <div className="rounded-lg p-8 text-center" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
+        <Package className="mx-auto mb-4 h-12 w-12" style={{ color: 'var(--text-muted)' }} />
+        <p style={{ color: 'var(--text-secondary)' }}>No installation information available</p>
       </div>
     )
   }
@@ -97,34 +97,35 @@ export function InstallationTab({ data }: InstallationTabProps) {
   return (
     <div className="space-y-8">
       {/* Package Info Header */}
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
-        <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900">
-          <Terminal className="h-5 w-5 text-blue-600" />
+      <div className="rounded-lg p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)', borderWidth: '1px' }}>
+        <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
+          <Terminal className="h-5 w-5" style={{ color: 'var(--accent)' }} />
           Package Information
         </h3>
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="rounded-md bg-gray-50 p-4">
-            <p className="text-xs font-medium text-gray-500">Package Name</p>
-            <p className="text-sm font-mono text-gray-900">{packageName}</p>
+          <div className="rounded-md p-4" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
+            <p className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>Package Name</p>
+            <p className="text-sm font-mono" style={{ color: 'var(--text-primary)' }}>{packageName}</p>
           </div>
-          <div className="rounded-md bg-gray-50 p-4">
-            <p className="text-xs font-medium text-gray-500">Latest Version</p>
-            <p className="text-sm font-mono text-gray-900">{version}</p>
+          <div className="rounded-md p-4" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
+            <p className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>Latest Version</p>
+            <p className="text-sm font-mono" style={{ color: 'var(--text-primary)' }}>{version}</p>
           </div>
           {requiresPython && (
-            <div className="rounded-md bg-gray-50 p-4 sm:col-span-2">
-              <p className="text-xs font-medium text-gray-500">Python Version Required</p>
-              <p className="text-sm font-mono text-gray-900">{requiresPython}</p>
+            <div className="rounded-md p-4 sm:col-span-2" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
+              <p className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>Python Version Required</p>
+              <p className="text-sm font-mono" style={{ color: 'var(--text-primary)' }}>{requiresPython}</p>
             </div>
           )}
           {extras.length > 0 && (
-            <div className="rounded-md bg-gray-50 p-4 sm:col-span-2">
-              <p className="text-xs font-medium text-gray-500">Optional Extras</p>
+            <div className="rounded-md p-4 sm:col-span-2" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
+              <p className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>Optional Extras</p>
               <div className="mt-1 flex flex-wrap gap-2">
                 {extras.map((extra) => (
                   <span
                     key={extra}
-                    className="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800"
+                    className="rounded-full px-2 py-1 text-xs font-medium"
+                    style={{ backgroundColor: 'var(--accent-light)', color: 'var(--accent)' }}
                   >
                     {extra}
                   </span>
@@ -136,27 +137,29 @@ export function InstallationTab({ data }: InstallationTabProps) {
       </div>
 
       {/* Installation Commands */}
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
-        <h3 className="mb-4 text-lg font-semibold text-gray-900">Install with Package Managers</h3>
+      <div className="rounded-lg p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)', borderWidth: '1px' }}>
+        <h3 className="mb-4 text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Install with Package Managers</h3>
         <div className="space-y-4">
           {installCommands.map((cmd) => (
             <div
               key={cmd.manager}
-              className="rounded-lg border border-gray-200 bg-gray-50 p-4 transition-colors hover:border-gray-300"
+              className="rounded-lg p-4 transition-colors"
+              style={{ backgroundColor: 'var(--bg-tertiary)', borderColor: 'var(--border)', borderWidth: '1px' }}
             >
               <div className="mb-2 flex items-center justify-between">
                 <div>
-                  <span className="font-semibold text-gray-900">{cmd.label}</span>
-                  <p className="text-xs text-gray-500">{cmd.description}</p>
+                  <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{cmd.label}</span>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{cmd.description}</p>
                 </div>
                 <button
                   onClick={() => handleCopy(cmd.command, cmd.manager)}
                   className={cn(
-                    'flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
-                    copiedCommand === cmd.manager
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-white text-gray-700 hover:bg-gray-100'
+                    'flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors'
                   )}
+                  style={{
+                    backgroundColor: copiedCommand === cmd.manager ? 'var(--success-light)' : 'var(--card-bg)',
+                    color: copiedCommand === cmd.manager ? 'var(--success)' : 'var(--text-secondary)'
+                  }}
                   title="Copy to clipboard"
                 >
                   {copiedCommand === cmd.manager ? (
@@ -177,7 +180,7 @@ export function InstallationTab({ data }: InstallationTabProps) {
               </div>
               {/* Show extra installation variants */}
               {extras.length > 0 && cmd.manager !== 'conda' && (
-                <div className="mt-2 text-xs text-gray-500">
+                <div className="mt-2 text-xs" style={{ color: 'var(--text-muted)' }}>
                   <p className="mb-1">With extras:</p>
                   <div className="space-y-1">
                     {extras.slice(0, 2).map((extra) => {
@@ -203,10 +206,11 @@ export function InstallationTab({ data }: InstallationTabProps) {
                       }
                       return (
                         <div key={extra} className="flex items-center justify-between">
-                          <code className="font-mono text-xs text-gray-600">{extraCmd}</code>
+                          <code className="font-mono text-xs" style={{ color: 'var(--text-secondary)' }}>{extraCmd}</code>
                           <button
                             onClick={() => handleCopy(extraCmd, `${cmd.manager}-${extra}`)}
-                            className="text-xs text-blue-600 hover:text-blue-800"
+                            className="text-xs hover:opacity-80"
+                            style={{ color: 'var(--accent)' }}
                           >
                             {copiedCommand === `${cmd.manager}-${extra}` ? 'Copied!' : 'Copy'}
                           </button>
@@ -222,21 +226,22 @@ export function InstallationTab({ data }: InstallationTabProps) {
       </div>
 
       {/* Configuration Files */}
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
-        <h3 className="mb-4 text-lg font-semibold text-gray-900">Add to Configuration Files</h3>
+      <div className="rounded-lg p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)', borderWidth: '1px' }}>
+        <h3 className="mb-4 text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Add to Configuration Files</h3>
         
         {/* requirements.txt */}
         <div className="mb-4">
           <div className="mb-2 flex items-center justify-between">
-            <span className="text-sm font-medium text-gray-700">requirements.txt</span>
+            <span className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>requirements.txt</span>
             <button
               onClick={() => handleCopy(requirementsFormat, 'requirements')}
               className={cn(
-                'flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium transition-colors',
-                copiedCommand === 'requirements'
-                  ? 'bg-green-100 text-green-700'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                'flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium transition-colors'
               )}
+              style={{
+                backgroundColor: copiedCommand === 'requirements' ? 'var(--success-light)' : 'var(--bg-tertiary)',
+                color: copiedCommand === 'requirements' ? 'var(--success)' : 'var(--text-secondary)'
+              }}
             >
               {copiedCommand === 'requirements' ? (
                 <>
@@ -259,15 +264,16 @@ export function InstallationTab({ data }: InstallationTabProps) {
         {/* pyproject.toml */}
         <div>
           <div className="mb-2 flex items-center justify-between">
-            <span className="text-sm font-medium text-gray-700">pyproject.toml (Poetry/PDM)</span>
+            <span className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>pyproject.toml (Poetry/PDM)</span>
             <button
               onClick={() => handleCopy(pyprojectFormat, 'pyproject')}
               className={cn(
-                'flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium transition-colors',
-                copiedCommand === 'pyproject'
-                  ? 'bg-green-100 text-green-700'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                'flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium transition-colors'
               )}
+              style={{
+                backgroundColor: copiedCommand === 'pyproject' ? 'var(--success-light)' : 'var(--bg-tertiary)',
+                color: copiedCommand === 'pyproject' ? 'var(--success)' : 'var(--text-secondary)'
+              }}
             >
               {copiedCommand === 'pyproject' ? (
                 <>
@@ -286,9 +292,9 @@ export function InstallationTab({ data }: InstallationTabProps) {
             <code className="font-mono text-sm text-green-400">{pyprojectFormat}</code>
           </div>
           {extras.length > 0 && (
-            <p className="mt-1 text-xs text-gray-500">
-              Add to <code className="rounded bg-gray-100 px-1">[tool.poetry.dependencies]</code> or{' '}
-              <code className="rounded bg-gray-100 px-1">[project.dependencies]</code> section
+            <p className="mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>
+              Add to <code className="rounded px-1" style={{ backgroundColor: 'var(--bg-tertiary)' }}>[tool.poetry.dependencies]</code> or{' '}
+              <code className="rounded px-1" style={{ backgroundColor: 'var(--bg-tertiary)' }}>[project.dependencies]</code> section
             </p>
           )}
         </div>
@@ -296,17 +302,17 @@ export function InstallationTab({ data }: InstallationTabProps) {
 
       {/* Additional Info */}
       {info.requires_dist && info.requires_dist.length > 0 && (
-        <div className="rounded-lg border border-gray-200 bg-white p-6">
-          <h3 className="mb-4 text-lg font-semibold text-gray-900">Dependencies</h3>
-          <div className="max-h-48 overflow-y-auto rounded-md bg-gray-50 p-4">
+        <div className="rounded-lg p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)', borderWidth: '1px' }}>
+          <h3 className="mb-4 text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Dependencies</h3>
+          <div className="max-h-48 overflow-y-auto rounded-md p-4" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
             <ul className="space-y-1">
               {info.requires_dist.slice(0, 10).map((dep, index) => (
-                <li key={index} className="font-mono text-sm text-gray-700">
+                <li key={index} className="font-mono text-sm" style={{ color: 'var(--text-secondary)' }}>
                   {dep}
                 </li>
               ))}
               {info.requires_dist.length > 10 && (
-                <li className="text-sm text-gray-500">
+                <li className="text-sm" style={{ color: 'var(--text-muted)' }}>
                   ... and {info.requires_dist.length - 10} more
                 </li>
               )}

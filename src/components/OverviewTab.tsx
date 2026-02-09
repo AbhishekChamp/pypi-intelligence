@@ -26,15 +26,15 @@ export function OverviewTab({ overview, health, healthLoading = false }: Overvie
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="rounded-lg bg-white p-6 shadow-sm">
+      <div className="rounded-lg p-6 shadow-sm" style={{ backgroundColor: 'var(--card-bg)' }}>
         <div className="mb-4 flex items-start justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">{overview.name}</h2>
-            <p className="mt-1 text-lg text-gray-600">{overview.summary}</p>
+            <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{overview.name}</h2>
+            <p className="mt-1 text-lg" style={{ color: 'var(--text-secondary)' }}>{overview.summary}</p>
           </div>
           <div className="flex items-center gap-2">
             {isHealthLoading ? (
-              <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-600">
+              <span className="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium" style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-muted)' }}>
                 <Loader2 className="mr-1 inline h-4 w-4 animate-spin" />
                 Computing Health...
               </span>
@@ -53,7 +53,7 @@ export function OverviewTab({ overview, health, healthLoading = false }: Overvie
                 Health: {health.score}/100
               </span>
             )}
-            <span className="rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-800">
+            <span className="rounded-full px-3 py-1 text-sm font-medium" style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}>
               v{overview.version}
             </span>
           </div>
@@ -99,8 +99,8 @@ export function OverviewTab({ overview, health, healthLoading = false }: Overvie
 
       {/* Project Links */}
       {Object.keys(overview.projectUrls).length > 0 && (
-        <div className="rounded-lg bg-white p-6 shadow-sm">
-          <h3 className="mb-4 text-lg font-semibold text-gray-900">Project Links</h3>
+        <div className="rounded-lg p-6 shadow-sm" style={{ backgroundColor: 'var(--card-bg)' }}>
+          <h3 className="mb-4 text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Project Links</h3>
           <div className="flex flex-wrap gap-3">
             {Object.entries(overview.projectUrls).map(([label, url]) => (
               <a
@@ -108,7 +108,8 @@ export function OverviewTab({ overview, health, healthLoading = false }: Overvie
                 href={url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-md bg-gray-100 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
+                className="inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium hover:opacity-80"
+                style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}
               >
                 {label}
                 <ExternalLink className="h-3.5 w-3.5" />
@@ -159,13 +160,13 @@ function StatCard({
   subtext?: string
 }) {
   return (
-    <div className="rounded-lg bg-white p-4 shadow-sm">
+    <div className="rounded-lg p-4 shadow-sm" style={{ backgroundColor: 'var(--card-bg)' }}>
       <div className="mb-2 flex items-center gap-2">
         {icon}
-        <span className="text-sm text-gray-500">{label}</span>
+        <span className="text-sm" style={{ color: 'var(--text-muted)' }}>{label}</span>
       </div>
-      <p className="text-lg font-semibold text-gray-900">{value}</p>
-      {subtext && <p className="text-xs text-gray-400">{subtext}</p>}
+      <p className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>{value}</p>
+      {subtext && <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{subtext}</p>}
     </div>
   )
 }

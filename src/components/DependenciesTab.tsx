@@ -74,8 +74,8 @@ export function DependenciesTab({ packageName, version, onPackageClick }: Depend
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
           <Loader2 className="mx-auto mb-4 h-12 w-12 animate-spin text-blue-500" />
-          <p className="text-gray-600">Analyzing dependency tree...</p>
-          <p className="mt-2 text-sm text-gray-500">This may take a moment for packages with many dependencies</p>
+          <p style={{ color: 'var(--text-secondary)' }}>Analyzing dependency tree...</p>
+          <p className="mt-2 text-sm" style={{ color: 'var(--text-muted)' }}>This may take a moment for packages with many dependencies</p>
         </div>
       </div>
     )
@@ -97,10 +97,10 @@ export function DependenciesTab({ packageName, version, onPackageClick }: Depend
 
   if (dependencies.length === 0) {
     return (
-      <div className="rounded-lg bg-gray-50 p-8 text-center">
-        <Package className="mx-auto mb-4 h-12 w-12 text-gray-400" />
-        <h3 className="text-lg font-medium text-gray-900">No Dependencies</h3>
-        <p className="text-gray-600">This package has no declared dependencies.</p>
+      <div className="rounded-lg p-8 text-center" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
+        <Package className="mx-auto mb-4 h-12 w-12" style={{ color: 'var(--text-muted)' }} />
+        <h3 className="text-lg font-medium" style={{ color: 'var(--text-primary)' }}>No Dependencies</h3>
+        <p style={{ color: 'var(--text-secondary)' }}>This package has no declared dependencies.</p>
       </div>
     )
   }
@@ -134,10 +134,10 @@ export function DependenciesTab({ packageName, version, onPackageClick }: Depend
       )}
 
       {/* Dependency Tree */}
-      <div className="rounded-lg border border-gray-200 bg-white">
-        <div className="border-b border-gray-200 bg-gray-50 px-4 py-3">
-          <h3 className="font-semibold text-gray-900">Dependency Tree (2 Levels)</h3>
-          <p className="text-xs text-gray-500">Click package names to view details. Click arrows to expand transitive dependencies.</p>
+      <div className="rounded-lg" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)', borderWidth: '1px' }}>
+        <div className="border-b px-4 py-3" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-tertiary)' }}>
+          <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>Dependency Tree (2 Levels)</h3>
+          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Click package names to view details. Click arrows to expand transitive dependencies.</p>
         </div>
         
         <div className="p-4">
@@ -157,17 +157,17 @@ export function DependenciesTab({ packageName, version, onPackageClick }: Depend
       </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap gap-4 text-xs text-gray-600">
+      <div className="flex flex-wrap gap-4 text-xs" style={{ color: 'var(--text-secondary)' }}>
         <div className="flex items-center gap-1">
           <span className="h-3 w-3 rounded-full bg-green-500"></span>
           <span>Direct dependency</span>
         </div>
         <div className="flex items-center gap-1">
-          <span className="h-3 w-3 rounded-full bg-gray-400"></span>
+          <span className="h-3 w-3 rounded-full" style={{ backgroundColor: 'var(--text-muted)' }}></span>
           <span>Transitive dependency</span>
         </div>
         <div className="flex items-center gap-1">
-          <span className="rounded bg-yellow-100 px-1 text-yellow-800">optional</span>
+          <span className="rounded px-1" style={{ backgroundColor: 'var(--warning-light)', color: 'var(--warning)' }}>optional</span>
           <span>Optional dependency</span>
         </div>
         <div className="flex items-center gap-1">
@@ -209,20 +209,26 @@ function DependencyNodeComponent({
   }) || []
 
   return (
-    <div className={cn('rounded-lg', level === 0 ? 'bg-gray-50' : 'bg-white')}>
+    <div className={cn('rounded-lg')} style={{ backgroundColor: level === 0 ? 'var(--bg-tertiary)' : 'var(--card-bg)' }}>
       <div
         className={cn(
           'flex items-center gap-2 rounded-lg px-3 py-2',
-          level === 0 ? 'hover:bg-gray-100' : 'hover:bg-gray-50',
           'transition-colors'
         )}
-        style={{ marginLeft: level * 24 }}
+        style={{ marginLeft: level * 24, backgroundColor: 'transparent' }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = level === 0 ? 'var(--border-light)' : 'var(--bg-tertiary)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'transparent';
+        }}
       >
         {/* Expand/Collapse Button */}
         {hasChildren ? (
           <button
             onClick={onToggle}
-            className="flex h-5 w-5 items-center justify-center rounded text-gray-500 hover:bg-gray-200 hover:text-gray-700"
+            className="flex h-5 w-5 items-center justify-center rounded hover:opacity-80"
+            style={{ color: 'var(--text-muted)' }}
           >
             {isExpanded ? (
               <ChevronDown className="h-4 w-4" />
@@ -238,39 +244,40 @@ function DependencyNodeComponent({
         {level === 0 ? (
           <Package className="h-4 w-4 text-green-600" />
         ) : (
-          <span className="h-2 w-2 rounded-full bg-gray-400" />
+          <span className="h-2 w-2 rounded-full" style={{ backgroundColor: 'var(--text-muted)' }} />
         )}
 
         {/* Package Name (Clickable) */}
         <button
           onClick={() => onPackageClick(node.name)}
-          className="font-mono text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline"
+          className="font-mono text-sm font-medium hover:underline"
+          style={{ color: 'var(--accent)' }}
         >
           {node.name}
         </button>
 
         {/* Version */}
         {node.version && (
-          <span className="text-xs text-gray-500">{node.version}</span>
+          <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{node.version}</span>
         )}
 
         {/* Specifier */}
         {node.specifier && (
-          <code className="rounded bg-gray-200 px-1.5 py-0.5 text-xs text-gray-600">
+          <code className="rounded px-1.5 py-0.5 text-xs" style={{ backgroundColor: 'var(--border)', color: 'var(--text-secondary)' }}>
             {node.specifier}
           </code>
         )}
 
         {/* Optional Badge */}
         {node.isOptional && (
-          <span className="rounded bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800">
+          <span className="rounded px-2 py-0.5 text-xs font-medium" style={{ backgroundColor: 'var(--warning-light)', color: 'var(--warning)' }}>
             optional
           </span>
         )}
 
         {/* Error Indicator */}
         {node.error && (
-          <div className="flex items-center gap-1 text-red-600" title={node.error}>
+          <div className="flex items-center gap-1" style={{ color: 'var(--error)' }} title={node.error}>
             <AlertTriangle className="h-3 w-3" />
             <span className="text-xs">unresolved</span>
           </div>
@@ -278,7 +285,7 @@ function DependencyNodeComponent({
 
         {/* Child Count */}
         {uniqueChildren.length > 0 && !isExpanded && (
-          <span className="text-xs text-gray-400">
+          <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
             +{uniqueChildren.length} more
           </span>
         )}

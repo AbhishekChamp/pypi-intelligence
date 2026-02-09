@@ -1,6 +1,5 @@
 // Test file for fuzzy matching functionality
 import { 
-  findSimilarPackages, 
   getPackageSuggestions, 
   isLikelyTypo, 
   getCorrectedPackageName,

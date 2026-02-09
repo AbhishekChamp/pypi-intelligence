@@ -39,20 +39,38 @@ export function ComparePage() {
 
   return (
     <Layout>
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <h1 className="mb-6 text-2xl font-bold text-gray-900">Compare Packages</h1>
+      <div 
+        className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8" 
+        style={{ backgroundColor: 'var(--bg-secondary)' }}
+      >
+        <h1 
+          className="mb-6 text-2xl font-bold" 
+          style={{ color: 'var(--text-primary)' }}
+        >
+          Compare Packages
+        </h1>
 
         {/* Search Inputs */}
         <div className="mb-4 grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="mb-2 block text-sm font-medium text-gray-700">Package 1</label>
+            <label 
+              className="mb-2 block text-sm font-medium" 
+              style={{ color: 'var(--text-secondary)' }}
+            >
+              Package 1
+            </label>
             <SearchInput
               onSearch={setP1}
               placeholder="Enter first package name..."
             />
           </div>
           <div>
-            <label className="mb-2 block text-sm font-medium text-gray-700">Package 2</label>
+            <label 
+              className="mb-2 block text-sm font-medium" 
+              style={{ color: 'var(--text-secondary)' }}
+            >
+              Package 2
+            </label>
             <SearchInput
               onSearch={setP2}
               placeholder="Enter second package name..."
@@ -89,12 +107,16 @@ function PackageComparisonCard({ packageName }: { packageName: string }) {
   const { stats, loading: statsLoading } = useDownloadStats(packageName)
   const health = useHealthScore(overview, compatibility, stats)
 
-  // Check if health is still being computed
-  const isHealthLoading = packageLoading || statsLoading || (health.score === 0 && health.breakdown.popularity === 0)
+  // Check if stats are loading or health is being computed
+  const isLoading = packageLoading || statsLoading
+  const isHealthLoading = isLoading || (health.score === 0 && !data)
 
   if (packageLoading) {
     return (
-      <div className="h-96 animate-pulse rounded-lg bg-gray-200" />
+      <div 
+        className="h-96 animate-pulse rounded-lg" 
+        style={{ backgroundColor: 'var(--bg-tertiary)' }}
+      />
     )
   }
 
@@ -105,18 +127,37 @@ function PackageComparisonCard({ packageName }: { packageName: string }) {
   if (!overview) return null
 
   return (
-    <div className="rounded-lg bg-white p-6 shadow-sm">
-      <div className="mb-4 border-b pb-4">
-        <h2 className="text-xl font-bold text-gray-900">{overview.name}</h2>
-        <p className="text-gray-600">{overview.summary}</p>
+    <div 
+      className="rounded-lg p-6 shadow-sm" 
+      style={{ backgroundColor: 'var(--card-bg)' }}
+    >
+      <div 
+        className="mb-4 border-b pb-4" 
+        style={{ borderColor: 'var(--border)' }}
+      >
+        <h2 
+          className="text-xl font-bold" 
+          style={{ color: 'var(--text-primary)' }}
+        >
+          {overview.name}
+        </h2>
+        <p style={{ color: 'var(--text-secondary)' }}>{overview.summary}</p>
       </div>
 
       {/* Health Score */}
       <div className="mb-4">
         <div className="mb-2 flex items-center justify-between">
-          <span className="text-sm font-medium text-gray-700">Health Score</span>
+          <span 
+            className="text-sm font-medium" 
+            style={{ color: 'var(--text-secondary)' }}
+          >
+            Health Score
+          </span>
           {isHealthLoading ? (
-            <span className="inline-flex items-center text-sm text-gray-500">
+            <span 
+              className="inline-flex items-center text-sm" 
+              style={{ color: 'var(--text-muted)' }}
+            >
               <Loader2 className="mr-1 inline h-4 w-4 animate-spin" />
               Computing...
             </span>
@@ -134,9 +175,15 @@ function PackageComparisonCard({ packageName }: { packageName: string }) {
             </span>
           )}
         </div>
-        <div className="h-2 rounded-full bg-gray-200">
+        <div 
+          className="h-2 rounded-full" 
+          style={{ backgroundColor: 'var(--bg-tertiary)' }}
+        >
           {isHealthLoading ? (
-            <div className="h-full w-full animate-pulse rounded-full bg-gray-300" />
+            <div 
+              className="h-full w-full animate-pulse rounded-full" 
+              style={{ backgroundColor: 'var(--border)' }}
+            />
           ) : (
             <div
               className={cn(
@@ -167,7 +214,8 @@ function PackageComparisonCard({ packageName }: { packageName: string }) {
         <ComparisonStat
           icon={<Download className="h-4 w-4" />}
           label="Monthly Downloads"
-          value={formatNumber(stats?.monthly || 0)}
+          value={statsLoading ? 'Loading...' : formatNumber(stats?.monthly || 0)}
+          isLoading={statsLoading}
         />
         <ComparisonStat
           icon={<Package className="h-4 w-4" />}
@@ -178,7 +226,12 @@ function PackageComparisonCard({ packageName }: { packageName: string }) {
 
       {/* Platform Support */}
       <div className="mb-4">
-        <h4 className="mb-2 text-sm font-medium text-gray-700">Platform Support</h4>
+        <h4 
+          className="mb-2 text-sm font-medium" 
+          style={{ color: 'var(--text-secondary)' }}
+        >
+          Platform Support
+        </h4>
         <div className="flex gap-2">
           <PlatformIcon supported={compatibility.platforms.linux} icon={<Container className="h-4 w-4" />} label="Linux" />
           <PlatformIcon supported={compatibility.platforms.macos} icon={<Apple className="h-4 w-4" />} label="macOS" />
@@ -188,12 +241,23 @@ function PackageComparisonCard({ packageName }: { packageName: string }) {
 
       {/* Warnings */}
       {!isHealthLoading && health.warnings.length > 0 && (
-        <div className="rounded-md bg-yellow-50 p-3">
+        <div 
+          className="rounded-md p-3" 
+          style={{ backgroundColor: 'var(--warning-light)' }}
+        >
           <div className="mb-1 flex items-center gap-1">
-            <AlertTriangle className="h-4 w-4 text-yellow-600" />
-            <span className="text-xs font-medium text-yellow-900">Warnings</span>
+            <AlertTriangle className="h-4 w-4" style={{ color: 'var(--warning)' }} />
+            <span 
+              className="text-xs font-medium" 
+              style={{ color: 'var(--warning)' }}
+            >
+              Warnings
+            </span>
           </div>
-          <ul className="list-inside list-disc text-xs text-yellow-800">
+          <ul 
+            className="list-inside list-disc text-xs" 
+            style={{ color: 'var(--warning)' }}
+          >
             {health.warnings.slice(0, 2).map((w, i) => (
               <li key={i}>{w}</li>
             ))}
@@ -208,18 +272,31 @@ function ComparisonStat({
   icon,
   label,
   value,
+  isLoading = false,
 }: {
   icon: React.ReactNode
   label: string
   value: string
+  isLoading?: boolean
 }) {
   return (
-    <div className="rounded-md bg-gray-50 p-3">
-      <div className="mb-1 flex items-center gap-1 text-gray-500">
+    <div 
+      className="rounded-md p-3" 
+      style={{ backgroundColor: 'var(--bg-tertiary)' }}
+    >
+      <div 
+        className="mb-1 flex items-center gap-1" 
+        style={{ color: 'var(--text-muted)' }}
+      >
         {icon}
         <span className="text-xs">{label}</span>
       </div>
-      <p className="text-sm font-medium text-gray-900">{value}</p>
+      <p 
+        className={`text-sm font-medium ${isLoading ? 'animate-pulse' : ''}`} 
+        style={{ color: 'var(--text-primary)' }}
+      >
+        {value}
+      </p>
     </div>
   )
 }
@@ -237,8 +314,14 @@ function PlatformIcon({
     <div
       className={cn(
         'flex items-center gap-1 rounded px-2 py-1 text-xs',
-        supported ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-500'
+        supported 
+          ? 'bg-green-100 text-green-800' 
+          : 'text-gray-500'
       )}
+      style={{
+        backgroundColor: supported ? 'var(--success-light)' : 'var(--bg-tertiary)',
+        color: supported ? 'var(--success)' : 'var(--text-muted)'
+      }}
     >
       {icon}
       {label}

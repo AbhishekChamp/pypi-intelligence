@@ -17,6 +17,11 @@ import {
   isValidDate,
 } from '@/utils'
 
+// Re-export other hooks
+export { useExportPackage } from './useExportPackage'
+export { useSearchHistory } from './useSearchHistory'
+export { useFavorites } from './useFavorites'
+
 // Hook for fetching package data
 export function usePackageData(packageName: string | null) {
   const [data, setData] = useState<PyPIPackage | null>(null)

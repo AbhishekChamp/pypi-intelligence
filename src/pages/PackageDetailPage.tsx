@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import {
   usePackageData,
@@ -7,6 +7,8 @@ import {
   useCompatibilityMatrix,
   useDownloadStats,
   useHealthScore,
+  useSearchHistory,
+  useFavorites,
 } from '@/hooks'
 import { usePackageSuggestions } from '@/hooks/usePackageSuggestions'
 import { Layout } from '@/components/Layout'
@@ -21,8 +23,9 @@ import { HealthTab } from '@/components/HealthTab'
 import { InstallationTab } from '@/components/InstallationTab'
 import { SecurityTab } from '@/components/SecurityTab'
 import { DependenciesTab } from '@/components/DependenciesTab'
+import { ExportActions } from '@/components/ExportActions'
 import type { TabId } from '@/types'
-import { ArrowLeft, GitCompare } from 'lucide-react'
+import { ArrowLeft, GitCompare, Heart } from 'lucide-react'
 
 export function PackageDetailPage() {
   const { packageName } = useParams<{ packageName: string }>()
@@ -34,12 +37,35 @@ export function PackageDetailPage() {
   const compatibility = useCompatibilityMatrix(data)
   const { stats, loading: statsLoading } = useDownloadStats(packageName || null)
   const health = useHealthScore(overview, compatibility, stats)
+  const { addToHistory } = useSearchHistory()
+  const { toggleFavorite, isFavorite } = useFavorites()
+
+  // Add to history when package loads successfully
+  useEffect(() => {
+    if (data && packageName) {
+      addToHistory({
+        packageName: packageName,
+        description: data.info.summary,
+        version: data.info.version,
+      })
+    }
+  }, [data, packageName, addToHistory])
 
   // Compute suggestions when package loads
   usePackageSuggestions(packageName || null)
 
   const handleSearch = (query: string) => {
     window.location.href = `/package/${query}`
+  }
+
+  const handleToggleFavorite = () => {
+    if (packageName && data) {
+      toggleFavorite({
+        packageName: packageName,
+        description: data.info.summary,
+        version: data.info.version,
+      })
+    }
   }
 
   return (
@@ -58,7 +84,7 @@ export function PackageDetailPage() {
           />
         ) : (
           <div className="space-y-6">
-            {/* Back Link & Compare */}
+            {/* Back Link & Compare & Favorite */}
             <div className="flex items-center justify-between">
               <Link
                 to="/"
@@ -67,15 +93,30 @@ export function PackageDetailPage() {
                 <ArrowLeft className="h-4 w-4" />
                 Back to search
               </Link>
-              {overview && (
-                <Link
-                  to={`/compare?p1=${overview.name}`}
-                  className="flex items-center gap-2 rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
-                >
-                  <GitCompare className="h-4 w-4" />
-                  Compare with another package
-                </Link>
-              )}
+              <div className="flex items-center gap-2">
+                {data && (
+                  <button
+                    onClick={handleToggleFavorite}
+                    className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+                      isFavorite(packageName || '')
+                        ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    <Heart className={`h-4 w-4 ${isFavorite(packageName || '') ? 'fill-red-500' : ''}`} />
+                    {isFavorite(packageName || '') ? 'Remove from Favorites' : 'Add to Favorites'}
+                  </button>
+                )}
+                {overview && (
+                  <Link
+                    to={`/compare?p1=${overview.name}`}
+                    className="flex items-center gap-2 rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
+                  >
+                    <GitCompare className="h-4 w-4" />
+                    Compare
+                  </Link>
+                )}
+              </div>
             </div>
 
             {/* Tabs Navigation */}
@@ -118,6 +159,13 @@ export function PackageDetailPage() {
               )}
               {activeTab === 'install' && <InstallationTab data={data} />}
             </div>
+
+            {/* Export Actions - shown when data is loaded */}
+            {data && (
+              <div className="mt-8">
+                <ExportActions packageData={data} />
+              </div>
+            )}
           </div>
         )}
       </div>
