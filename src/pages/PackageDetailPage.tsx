@@ -24,6 +24,7 @@ import { InstallationTab } from '@/components/InstallationTab'
 import { SecurityTab } from '@/components/SecurityTab'
 import { DependenciesTab } from '@/components/DependenciesTab'
 import { ExportActions } from '@/components/ExportActions'
+import { MarkdownExportButton } from '@/components/MarkdownExport'
 import type { TabId } from '@/types'
 import { ArrowLeft, GitCompare, Heart } from 'lucide-react'
 
@@ -162,8 +163,9 @@ export function PackageDetailPage() {
 
             {/* Export Actions - shown when data is loaded */}
             {data && (
-              <div className="mt-8">
+              <div className="mt-8 flex flex-wrap items-center gap-4">
                 <ExportActions packageData={data} />
+                <MarkdownExportButton packageData={data} healthScore={health} variant="outline" />
               </div>
             )}
           </div>

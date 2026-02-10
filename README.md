@@ -1,6 +1,6 @@
 # PyPI Intelligence Dashboard
 
-A comprehensive production-readiness and install-risk dashboard for Python packages from PyPI. Make informed decisions before adding dependencies to your projects with health scoring, compatibility analysis, and intelligent comparison features.
+A comprehensive production-readiness and install-risk dashboard for Python packages from PyPI. Make informed decisions before adding dependencies to your projects with health scoring, compatibility analysis, intelligent comparison features, and advanced developer tools.
 
 ## Features
 
@@ -10,6 +10,37 @@ A comprehensive production-readiness and install-risk dashboard for Python packa
 - **Version History**: Complete release timeline with yanked version detection
 - **Compatibility Matrix**: Python version support and wheel availability across platforms
 - **Download Trends**: 30-day download history with trend analysis
+- **Security Analysis**: Vulnerability scanning via OSV database
+
+### Developer Tools
+- **Project Dependency Scanner**: Upload `requirements.txt` or `pyproject.toml` to analyze entire dependency trees
+  - Bulk health analysis with aggregate scores
+  - Security vulnerability detection for all dependencies
+  - Export detailed JSON reports
+  - Supports requirements.txt, pyproject.toml, and Pipfile formats
+
+- **Interactive Dependency Graph**: Visualize package dependencies with force-directed graph
+  - Color-coded nodes by health status and vulnerabilities
+  - Zoom, pan, and fullscreen controls
+  - Export as SVG
+  - Click nodes for detailed package information
+
+- **Download Trend Comparison**: Compare multiple packages side-by-side
+  - Line and area chart views
+  - 30-day download history per package
+  - Trend direction indicators (up/down/stable)
+  - Export data as CSV
+
+- **Requirements File Generator**: Interactive builder for dependency files
+  - Generate requirements.txt, pyproject.toml (PEP 621), poetry.toml, and Pipfile
+  - Version specifier selection (>=, ==, ~=, etc.)
+  - Support for extras (e.g., `requests[security]`)
+  - One-click copy and download
+
+- **Markdown Export**: Generate comprehensive package reports
+  - README-ready markdown format
+  - Includes health scores, installation commands, dependencies
+  - Perfect for documentation and team sharing
 
 ### Comparison & Recommendations
 - **Package Comparison**: Side-by-side comparison of two packages with detailed metrics
@@ -22,11 +53,19 @@ A comprehensive production-readiness and install-risk dashboard for Python packa
 - **Extras Support**: Shows optional extras installation (e.g., `pip install fastapi[standard]`)
 - **Configuration Formats**: Copy-paste ready formats for requirements.txt and pyproject.toml
 
+### User Experience
+- **Dark/Light Theme**: Automatic system preference detection with manual toggle
+- **Search History**: Recently viewed packages with quick access
+- **Favorites**: Bookmark frequently used packages
+- **Export & Share**: JSON export and shareable links for packages
+- **Keyboard Shortcuts**: `/` to focus search, `Esc` to clear, `?` for help
+
 ### Resilience & Error Handling
 - **API Timeouts**: 10-second timeout with automatic retries (up to 3 attempts)
 - **Rate Limiting**: Handles 429 responses with exponential backoff
 - **CORS Proxy**: Vite proxy configuration for seamless API access
 - **Graceful Degradation**: Continues functioning even when some data sources fail
+- **Caching Strategy**: LRU cache with 5-minute TTL reduces API calls
 
 ## Tech Stack
 
@@ -35,6 +74,7 @@ A comprehensive production-readiness and install-risk dashboard for Python packa
 - **Styling**: Tailwind CSS 4
 - **Routing**: React Router 7
 - **Charts**: Recharts
+- **Graph Visualization**: Custom force-directed simulation
 - **Icons**: Lucide React
 - **Package Manager**: pnpm
 
@@ -74,10 +114,18 @@ The production build will be in the `dist` directory.
 ### Search for a Package
 1. Enter a package name in the search bar
 2. View detailed health metrics, compatibility info, and installation options
-3. Navigate through tabs: Overview, Versions, Compatibility, Downloads, Health, Install
+3. Navigate through tabs: Overview, Versions, Dependencies, Security, Compatibility, Downloads, Health, Install
+4. Export a markdown report with the "Export Markdown" button
+
+### Use Developer Tools
+1. Click **"Tools"** in the header navigation
+2. Choose from:
+   - **Dependency Scanner**: Upload your project files for bulk analysis
+   - **Download Trends**: Compare multiple packages' popularity
+   - **Requirements Generator**: Build dependency files interactively
 
 ### Compare Packages
-1. Click "Compare with another package" or go to `/compare`
+1. Click "Compare" on any package page or go to `/compare`
 2. Enter the first package name
 3. See smart suggestions for similar packages based on PyPI classifiers
 4. Click a suggestion or manually enter a second package
@@ -110,40 +158,53 @@ netlify deploy --prod --dir=dist
   - Supports both legacy and SPDX license formats
 - **PyPIStats API**: `https://pypistats.org/api/packages/<package>/recent`
   - Download statistics and trends
+- **OSV API**: `https://api.osv.dev/v1/query`
+  - Security vulnerability database
 
 ## Project Structure
 
 ```
 src/
 ├── api/                   # API clients with caching and error handling
-│   └── pypi.ts           # PyPI and PyPIStats API clients
+│   └── pypi.ts           # PyPI, PyPIStats, and OSV API clients
 ├── components/           # React components
 │   ├── CompatibilityTab.tsx
+│   ├── DependenciesTab.tsx
+│   ├── DependencyGraph.tsx     # Interactive graph visualization
 │   ├── DownloadsTab.tsx
+│   ├── DownloadTrendComparison.tsx  # Multi-package trend charts
 │   ├── ErrorDisplay.tsx
 │   ├── Header.tsx
 │   ├── HealthTab.tsx
-│   ├── InstallationTab.tsx     # Installation commands component
+│   ├── InstallationTab.tsx
 │   ├── Layout.tsx
+│   ├── MarkdownExport.tsx      # Markdown report generation
 │   ├── OverviewTab.tsx
-│   ├── PackageComparisonCard.tsx
-│   ├── PackageSuggestions.tsx  # Smart suggestion cards
+│   ├── ProjectDependencyScanner.tsx  # File upload analysis
+│   ├── RequirementsGenerator.tsx     # Interactive file builder
+│   ├── SecurityTab.tsx
 │   ├── SearchInput.tsx
-│   ├── Skeleton.tsx
 │   ├── Tabs.tsx
 │   └── VersionsTab.tsx
+├── contexts/             # React contexts
+│   └── ThemeProvider.tsx # Dark/light theme management
 ├── hooks/                # Custom React hooks
-│   ├── index.ts         # Core data hooks (usePackageData, etc.)
-│   └── usePackageSuggestions.ts  # Smart suggestion hook
+│   ├── index.ts         # Core data hooks
+│   ├── useFavorites.ts
+│   ├── usePackageSuggestions.ts
+│   └── useSearchHistory.ts
 ├── pages/                # Page components
+│   ├── AboutPage.tsx
 │   ├── ComparePage.tsx
 │   ├── HomePage.tsx
-│   └── PackageDetailPage.tsx
+│   ├── PackageDetailPage.tsx
+│   └── ToolsPage.tsx    # Developer tools hub
 ├── types/                # TypeScript definitions
 │   └── index.ts
 ├── utils/                # Utility functions
-│   ├── index.ts         # General utilities
-│   └── suggestions.ts   # Classifier matching algorithms
+│   ├── index.ts
+│   ├── packageNames.ts
+│   └── suggestions.ts
 ├── App.tsx
 ├── index.css
 └── main.tsx
@@ -157,11 +218,23 @@ src/
 - Calculates similarity scores based on classifier overlap
 - Caches suggestions in sessionStorage for 5 minutes
 
+### Dependency Graph Visualization
+- Custom force-directed physics simulation
+- Real-time node positioning with repulsion and attraction forces
+- Zoom and pan support with transform matrix
+- Color-coded by health score and vulnerability status
+
 ### Error Resilience
 - In-memory LRU cache (100 items, 5-minute TTL) to reduce API calls
 - Automatic retry with exponential backoff for transient failures
 - Graceful fallbacks when APIs are unavailable
 - SessionStorage availability checks for private browsing mode
+
+### Security Analysis
+- Integration with OSV (Open Source Vulnerabilities) database
+- Real-time vulnerability checking for any package version
+- Severity scoring and CVE references
+- Cached results for performance
 
 ### License Detection
 - Supports both legacy `license` field and modern `license_expression` (SPDX)
@@ -203,6 +276,16 @@ No environment variables are required. The app uses public PyPI APIs.
 - **Lazy Loading**: Components loaded on demand
 - **API Caching**: Client-side caching reduces API calls
 - **Tree Shaking**: Unused code eliminated in production
+- **SVG Export**: Client-side generation without server processing
+
+## Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `/` | Focus search bar |
+| `Esc` | Clear search / Close modals |
+| `?` | Show keyboard shortcuts help |
+| `Ctrl/Cmd + Enter` | Submit search |
 
 ## Contributing
 
@@ -220,4 +303,5 @@ MIT
 
 - [PyPI](https://pypi.org/) for the package metadata API
 - [PyPIStats](https://pypistats.org/) for download statistics
+- [OSV](https://osv.dev/) for security vulnerability data
 - [Trove Classifiers](https://pypi.org/classifiers/) for package categorization

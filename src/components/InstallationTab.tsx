@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { cn } from '@/utils'
-import { Copy, Check, Terminal, Package } from 'lucide-react'
+import { Copy, Check, Terminal, Package, ChevronDown, ChevronUp } from 'lucide-react'
 import type { PyPIPackage } from '@/types'
 
 interface InstallationTabProps {
@@ -18,6 +18,7 @@ interface InstallCommand {
 
 export function InstallationTab({ data }: InstallationTabProps) {
   const [copiedCommand, setCopiedCommand] = useState<string | null>(null)
+  const [showAllDependencies, setShowAllDependencies] = useState(false)
 
   if (!data) {
     return (
@@ -303,20 +304,57 @@ export function InstallationTab({ data }: InstallationTabProps) {
       {/* Additional Info */}
       {info.requires_dist && info.requires_dist.length > 0 && (
         <div className="rounded-lg p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)', borderWidth: '1px' }}>
-          <h3 className="mb-4 text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Dependencies</h3>
-          <div className="max-h-48 overflow-y-auto rounded-md p-4" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Dependencies</h3>
+            <button
+              onClick={() => handleCopy(info.requires_dist!.join('\n'), 'all-dependencies')}
+              className="flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
+              style={{
+                backgroundColor: copiedCommand === 'all-dependencies' ? 'var(--success-light)' : 'var(--bg-tertiary)',
+                color: copiedCommand === 'all-dependencies' ? 'var(--success)' : 'var(--text-secondary)'
+              }}
+              title="Copy all dependencies"
+            >
+              {copiedCommand === 'all-dependencies' ? (
+                <>
+                  <Check className="h-3 w-3" />
+                  Copied
+                </>
+              ) : (
+                <>
+                  <Copy className="h-3 w-3" />
+                  Copy All
+                </>
+              )}
+            </button>
+          </div>
+          <div className="max-h-60 overflow-y-auto rounded-md p-4" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
             <ul className="space-y-1">
-              {info.requires_dist.slice(0, 10).map((dep, index) => (
+              {(showAllDependencies ? info.requires_dist : info.requires_dist.slice(0, 10)).map((dep, index) => (
                 <li key={index} className="font-mono text-sm" style={{ color: 'var(--text-secondary)' }}>
                   {dep}
                 </li>
               ))}
-              {info.requires_dist.length > 10 && (
-                <li className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                  ... and {info.requires_dist.length - 10} more
-                </li>
-              )}
             </ul>
+            {info.requires_dist.length > 10 && (
+              <button
+                onClick={() => setShowAllDependencies(!showAllDependencies)}
+                className="mt-3 flex items-center gap-1 text-sm font-medium transition-colors hover:opacity-80"
+                style={{ color: 'var(--accent)' }}
+              >
+                {showAllDependencies ? (
+                  <>
+                    <ChevronUp className="h-4 w-4" />
+                    Show Less
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="h-4 w-4" />
+                    ... and {info.requires_dist.length - 10} more
+                  </>
+                )}
+              </button>
+            )}
           </div>
         </div>
       )}

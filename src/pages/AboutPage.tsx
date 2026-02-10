@@ -14,7 +14,13 @@ import {
   Shield,
   Terminal,
   Heart,
-  Package
+  Package,
+  Scan,
+  GitGraph,
+  TrendingUp,
+  FileCode,
+  FileText,
+  Wrench
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Layout } from '@/components/Layout';
@@ -69,6 +75,107 @@ export function AboutPage() {
             </p>
           </section>
 
+          {/* Developer Tools */}
+          <section className="mb-12">
+            <h2 
+              className="mb-6 flex items-center gap-3 text-2xl font-bold" 
+              style={{ color: 'var(--text-primary)' }}
+            >
+              <Wrench className="h-7 w-7 text-orange-600" />
+              Developer Tools
+            </h2>
+            <p className="mb-6" style={{ color: 'var(--text-secondary)' }}>
+              Advanced utilities to help you manage Python dependencies effectively. Access these tools from the <Link to="/tools" className="text-blue-600 hover:underline">Tools</Link> page.
+            </p>
+            
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div 
+                className="rounded-xl border p-6" 
+                style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
+              >
+                <h3 
+                  className="mb-2 flex items-center gap-2 font-semibold" 
+                  style={{ color: 'var(--text-primary)' }}
+                >
+                  <Scan className="h-5 w-5 text-orange-600" />
+                  Dependency Scanner
+                </h3>
+                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                  Upload requirements.txt or pyproject.toml to analyze entire dependency trees. 
+                  Get bulk health scores, security vulnerability reports, and detailed JSON exports.
+                </p>
+              </div>
+
+              <div 
+                className="rounded-xl border p-6" 
+                style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
+              >
+                <h3 
+                  className="mb-2 flex items-center gap-2 font-semibold" 
+                  style={{ color: 'var(--text-primary)' }}
+                >
+                  <GitGraph className="h-5 w-5 text-purple-600" />
+                  Dependency Graph
+                </h3>
+                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                  Interactive force-directed visualization of package dependencies. 
+                  Color-coded by health status with zoom, pan, and SVG export capabilities.
+                </p>
+              </div>
+
+              <div 
+                className="rounded-xl border p-6" 
+                style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
+              >
+                <h3 
+                  className="mb-2 flex items-center gap-2 font-semibold" 
+                  style={{ color: 'var(--text-primary)' }}
+                >
+                  <TrendingUp className="h-5 w-5 text-green-600" />
+                  Download Trend Comparison
+                </h3>
+                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                  Compare download statistics across multiple packages with interactive charts. 
+                  Track trends, export CSV data, and identify rising or declining packages.
+                </p>
+              </div>
+
+              <div 
+                className="rounded-xl border p-6" 
+                style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
+              >
+                <h3 
+                  className="mb-2 flex items-center gap-2 font-semibold" 
+                  style={{ color: 'var(--text-primary)' }}
+                >
+                  <FileCode className="h-5 w-5 text-cyan-600" />
+                  Requirements Generator
+                </h3>
+                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                  Interactive builder for requirements.txt, pyproject.toml (PEP 621), poetry.toml, 
+                  and Pipfile. Support for version specifiers and extras.
+                </p>
+              </div>
+
+              <div 
+                className="rounded-xl border p-6" 
+                style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
+              >
+                <h3 
+                  className="mb-2 flex items-center gap-2 font-semibold" 
+                  style={{ color: 'var(--text-primary)' }}
+                >
+                  <FileText className="h-5 w-5 text-blue-600" />
+                  Markdown Export
+                </h3>
+                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                  Generate comprehensive markdown reports for any package. 
+                  Perfect for documentation, team sharing, or README files with health scores and installation commands.
+                </p>
+              </div>
+            </div>
+          </section>
+
           {/* Current Features */}
           <section className="mb-12">
             <h2 
@@ -76,7 +183,7 @@ export function AboutPage() {
               style={{ color: 'var(--text-primary)' }}
             >
               <BarChart3 className="h-7 w-7 text-green-600" />
-              Current Features
+              Core Features
             </h2>
             
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -111,6 +218,23 @@ export function AboutPage() {
                 <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
                   Comprehensive scoring system evaluating maintenance frequency, popularity metrics, 
                   and overall package quality with detailed breakdowns.
+                </p>
+              </div>
+
+              <div 
+                className="rounded-xl border p-6" 
+                style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
+              >
+                <h3 
+                  className="mb-2 flex items-center gap-2 font-semibold" 
+                  style={{ color: 'var(--text-primary)' }}
+                >
+                  <Shield className="h-5 w-5 text-red-600" />
+                  Security Analysis
+                </h3>
+                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                  Vulnerability scanning via OSV database to identify known CVEs affecting packages 
+                  and their dependencies.
                 </p>
               </div>
 
@@ -213,6 +337,23 @@ export function AboutPage() {
                 <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
                   Browse recent package versions with yanked version detection 
                   and quick access to PyPI details.
+                </p>
+              </div>
+
+              <div 
+                className="rounded-xl border p-6" 
+                style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
+              >
+                <h3 
+                  className="mb-2 flex items-center gap-2 font-semibold" 
+                  style={{ color: 'var(--text-primary)' }}
+                >
+                  <Palette className="h-5 w-5 text-pink-600" />
+                  Dark/Light Theme
+                </h3>
+                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                  Automatic system preference detection with manual toggle. 
+                  Persistent theme selection across sessions.
                 </p>
               </div>
             </div>

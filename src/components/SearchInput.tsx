@@ -90,7 +90,7 @@ export const SearchInput = forwardRef<SearchInputHandle, SearchInputProps>(
     return (
       <form onSubmit={handleSubmit} className="relative w-full max-w-2xl">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
           <input
             ref={inputRef}
             type="text"
@@ -101,16 +101,21 @@ export const SearchInput = forwardRef<SearchInputHandle, SearchInputProps>(
             onBlur={onBlur}
             placeholder={placeholder}
             className={cn(
-              'w-full rounded-lg border border-gray-300 py-3 pl-10 pr-24',
-              'text-gray-900 placeholder-gray-400',
+              'w-full rounded-lg border py-3 pl-10 pr-24',
+              'placeholder:text-[var(--text-muted)]',
               'focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20',
               'disabled:cursor-not-allowed disabled:opacity-50'
             )}
+            style={{
+              backgroundColor: 'var(--bg-primary)',
+              borderColor: 'var(--border)',
+              color: 'var(--text-primary)',
+            }}
             disabled={loading}
           />
           <div className="absolute right-2 top-1/2 flex -translate-y-1/2 items-center gap-1">
             {query && (
-              <kbd className="hidden rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-500 sm:inline-block">
+              <kbd className="hidden rounded px-1.5 py-0.5 text-xs sm:inline-block" style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-muted)' }}>
                 Esc
               </kbd>
             )}
@@ -133,8 +138,8 @@ export const SearchInput = forwardRef<SearchInputHandle, SearchInputProps>(
           </div>
         </div>
         {enableKeyboardShortcuts && (
-          <div className="mt-2 hidden text-center text-xs text-gray-500 sm:block">
-            Press <kbd className="rounded bg-gray-100 px-1.5 py-0.5">/</kbd> to focus search
+          <div className="mt-2 hidden text-center text-xs sm:block" style={{ color: 'var(--text-muted)' }}>
+            Press <kbd className="rounded px-1.5 py-0.5" style={{ backgroundColor: 'var(--bg-tertiary)' }}>/</kbd> to focus search
           </div>
         )}
       </form>
