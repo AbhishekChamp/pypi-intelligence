@@ -180,17 +180,17 @@ export async function fetchDownloadStats(packageName: string): Promise<PyPIStats
 }
 
 export async function fetchDailyStats(
-  packageName: string,
-  days: number = 30
+  packageName: string
 ): Promise<PyPIStatsDaily> {
-  const cacheKey = `stats:daily:${packageName.toLowerCase()}:${days}`
+  const cacheKey = `stats:daily:${packageName.toLowerCase()}`
   const cached = getCached<PyPIStatsDaily>(cacheKey)
   if (cached) return cached
 
   try {
     // Use Vite proxy to avoid CORS issues
+    // Note: The API returns the last 180 days of data (max retention period)
     const response = await fetchWithRetry(
-      `/api/pypistats/packages/${packageName}/overall?mirrors=true&period=day&days=${days}`,
+      `/api/pypistats/packages/${packageName}/overall?mirrors=true`,
       {
         headers: {
           'Accept': 'application/json',

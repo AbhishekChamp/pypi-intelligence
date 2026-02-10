@@ -32,14 +32,33 @@ export function formatDate(date: Date | string | null): string {
   }
 }
 
+export interface FormattedNumber {
+  short: string
+  full: string
+  value: number
+}
+
 export function formatNumber(num: number): string {
+  const formatted = formatNumberWithFull(num)
+  return formatted.short
+}
+
+export function formatNumberWithFull(num: number): FormattedNumber {
+  const full = num.toLocaleString()
+  
+  if (num >= 1_000_000_000) {
+    const short = (num / 1_000_000_000).toFixed(1) + 'B'
+    return { short, full, value: num }
+  }
   if (num >= 1_000_000) {
-    return (num / 1_000_000).toFixed(1) + 'M'
+    const short = (num / 1_000_000).toFixed(1) + 'M'
+    return { short, full, value: num }
   }
   if (num >= 1_000) {
-    return (num / 1_000).toFixed(1) + 'k'
+    const short = (num / 1_000).toFixed(1) + 'k'
+    return { short, full, value: num }
   }
-  return num.toString()
+  return { short: num.toString(), full: num.toString(), value: num }
 }
 
 export function formatBytes(bytes: number): string {

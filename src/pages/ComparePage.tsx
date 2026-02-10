@@ -12,18 +12,41 @@ import {
   useHealthScore,
 } from '@/hooks'
 
-import { cn, formatNumber, formatDate } from '@/utils'
+import { cn, formatDate } from '@/utils'
+import { NumberDisplay } from '@/components/NumberDisplay'
 import {
   AlertTriangle,
   Package,
   Clock,
   Users,
   Download,
-  Container,
-  Apple,
-  Monitor,
   Loader2,
 } from 'lucide-react'
+
+// Platform Icons
+function LinuxIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12.5 1.5c-.2 0-.4 0-.6.1-2.9.3-2.1 3.8-2.2 5-.1.9-.2 1.7-.9 2.6-.7.9-1.8 2.3-2.3 3.8-.2.7-.3 1.4-.2 2.1-.1.1-.2.2-.2.3-.3.3-.4.6-.6.8-.2.2-.4.3-.7.4-.3.1-.5.3-.7.6-.1.2-.1.3-.1.5 0 .2 0 .3.1.4.1.4.1.6 0 .8-.3.6-.3 1-.2 1.3.2.3.5.4.8.5.7.2 1.6.1 2.3.5.8.4 1.6.6 2.2.4.5-.1.8-.4 1-.8.5 0 1-.3 1.8-.3.6 0 1.3.3 2.1.2 0 .1.1.2.2.4l.1.1c.4.7 1 1 1.7.9.7-.1 1.4-.5 2-1.1.5-.6 1.4-.9 2-1.2.3-.2.5-.4.5-.7 0-.3-.2-.7-.6-1.1v-.1l-.1-.1c-.2-.2-.3-.5-.4-.8-.1-.4-.2-.7-.4-.9l-.1-.1-.2-.2-.1-.1c.4-1.2.3-2.4-.2-3.5-.5-1.2-1.3-2.2-2-3-.7-.9-1.4-1.7-1.4-2.9 0-2 .2-5.6-3.1-5.6zm.5 3.1h.1c.2 0 .4.1.5.2.2.1.3.3.4.5.1.2.2.4.2.7 0 0 0-.1 0-.2v.1l-.1-.1v-.1c0 .2-.1.4-.2.6-.1.1-.2.2-.3.3l-.1-.1c-.1 0-.2-.1-.3-.2l-.2-.1c.1-.1.2-.2.2-.3 0-.2.1-.3.1-.5v-.1c0-.1 0-.3-.1-.5 0-.2-.1-.2-.2-.4-.1-.1-.2-.2-.3-.2h-.1c-.1 0-.2 0-.3.2-.1.1-.2.2-.2.4 0 .1-.1.3-.1.4v.1c0 .1 0 .2.1.5 0 .1.1.2.2.3-.1 0-.2.1-.3.1-.1.1-.2.1-.3.2-.1 0-.1 0-.2.1-.1-.1-.2-.2-.2-.4-.1-.2-.2-.4-.2-.6v-.1-.1-.1v-.1c0 .1 0 .2 0 .3 0-.2.1-.4.2-.6.1-.2.2-.4.4-.5.2-.1.3-.2.5-.2zm-1.8 7.5h.1c.3 0 .6.1.7.4.3.4.2 1-.1 1.3-.2.2-.4.3-.6.3-.3 0-.5-.1-.7-.3-.3-.4-.3-.9-.1-1.3.2-.3.5-.4.7-.4zm4.4 0h.1c.3 0 .6.1.7.4.3.4.2 1-.1 1.3-.2.2-.4.3-.6.3-.3 0-.5-.1-.7-.3-.3-.4-.3-.9-.1-1.3.2-.3.5-.4.7-.4z"/>
+    </svg>
+  )
+}
+
+function AppleIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M18.7 19.5c-.8 1.2-1.7 2.4-3 2.5-1.4 0-1.8-.8-3.3-.8-1.5 0-2 .8-3.3.8-1.3.1-2.3-1.3-3.1-2.5-1.7-2.4-3-6.9-1.2-10 .9-1.5 2.4-2.5 4.1-2.5 1.3 0 2.5.9 3.3.9.8 0 2.3-1.1 3.8-.9.7 0 2.5.3 3.6 2-.1.1-2.2 1.3-2.2 3.8 0 3 2.7 4 2.7 4.1 0 .1-.4 1.4-1.4 2.8M13 3.5c.7-.8 1.9-1.5 2.9-1.5.1 1.2-.3 2.4-1 3.2-.7.9-1.8 1.5-2.9 1.4-.2-1.2.4-2.4 1-3.1z"/>
+    </svg>
+  )
+}
+
+function WindowsIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M2 4.5l8-.5v7.5H2V4.5zM2 11.5h8v7.5l-8-.5v-7zm9-7.5l11-1.5v9H11V4zM11 11.5h11V21l-11-1.5v-8z"/>
+    </svg>
+  )
+}
 
 export function ComparePage() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -91,8 +114,8 @@ export function ComparePage() {
         {/* Comparison Results */}
         {(p1 || p2) && (
           <div className="grid gap-4 lg:grid-cols-2">
-            {p1 && <PackageComparisonCard packageName={p1} />}
-            {p2 && <PackageComparisonCard packageName={p2} />}
+            {p1 && <PackageComparisonCard key={`p1-${p1}`} packageName={p1} />}
+            {p2 && <PackageComparisonCard key={`p2-${p2}`} packageName={p2} />}
           </div>
         )}
       </div>
@@ -104,7 +127,7 @@ function PackageComparisonCard({ packageName }: { packageName: string }) {
   const { data, loading: packageLoading, error } = usePackageData(packageName)
   const overview = usePackageOverview(data)
   const compatibility = useCompatibilityMatrix(data)
-  const { stats, loading: statsLoading } = useDownloadStats(packageName)
+  const { stats, loading: statsLoading } = useDownloadStats(packageName || null)
   const health = useHealthScore(overview, compatibility, stats)
 
   // Check if stats are loading or health is being computed
@@ -211,12 +234,26 @@ function PackageComparisonCard({ packageName }: { packageName: string }) {
           label="Maintainers"
           value={overview.maintainerCount.toString()}
         />
-        <ComparisonStat
-          icon={<Download className="h-4 w-4" />}
-          label="Monthly Downloads"
-          value={statsLoading ? 'Loading...' : formatNumber(stats?.monthly || 0)}
-          isLoading={statsLoading}
-        />
+        <div 
+          className="rounded-md p-3" 
+          style={{ backgroundColor: 'var(--bg-tertiary)' }}
+        >
+          <div 
+            className="mb-1 flex items-center gap-1" 
+            style={{ color: 'var(--text-muted)' }}
+          >
+            <Download className="h-4 w-4" />
+            <span className="text-xs">Monthly Downloads</span>
+          </div>
+          {statsLoading ? (
+            <div className="h-5 w-20 animate-pulse rounded" style={{ backgroundColor: 'var(--border)' }} />
+          ) : (
+            <NumberDisplay 
+              value={stats?.monthly || 0} 
+              className="text-sm font-medium"
+            />
+          )}
+        </div>
         <ComparisonStat
           icon={<Package className="h-4 w-4" />}
           label="Version"
@@ -233,9 +270,9 @@ function PackageComparisonCard({ packageName }: { packageName: string }) {
           Platform Support
         </h4>
         <div className="flex gap-2">
-          <PlatformIcon supported={compatibility.platforms.linux} icon={<Container className="h-4 w-4" />} label="Linux" />
-          <PlatformIcon supported={compatibility.platforms.macos} icon={<Apple className="h-4 w-4" />} label="macOS" />
-          <PlatformIcon supported={compatibility.platforms.windows} icon={<Monitor className="h-4 w-4" />} label="Windows" />
+          <PlatformIcon supported={compatibility.platforms.linux} icon={<LinuxIcon className="h-4 w-4" />} label="Linux" />
+          <PlatformIcon supported={compatibility.platforms.macos} icon={<AppleIcon className="h-4 w-4" />} label="macOS" />
+          <PlatformIcon supported={compatibility.platforms.windows} icon={<WindowsIcon className="h-4 w-4" />} label="Windows" />
         </div>
       </div>
 

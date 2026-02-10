@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import {
   LineChart,
   Line,
@@ -13,6 +13,8 @@ import {
 } from 'recharts'
 import { X, Plus, TrendingUp, TrendingDown, Minus, Download, Trash2 } from 'lucide-react'
 import { fetchDailyStats } from '@/api/pypi'
+import { NumberDisplay } from './NumberDisplay'
+import { TIME_RANGE_OPTIONS, type TimeRange } from '@/hooks'
 import type { PyPIStatsDaily } from '@/types'
 
 interface PackageTrend {
@@ -32,13 +34,49 @@ const COLORS = [
   '#84cc16', // lime
 ]
 
+// Custom tooltip for chart
+function CustomTooltip({ active, payload, label }: {
+  active?: boolean
+  payload?: Array<{ value: number; name: string; color: string }>
+  label?: string
+}) {
+  if (active && payload && payload.length) {
+    return (
+      <div
+        className="rounded-md px-3 py-2 shadow-lg"
+        style={{
+          backgroundColor: 'var(--card-bg)',
+          border: '1px solid var(--border)',
+        }}
+      >
+        <p className="text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
+          {label}
+        </p>
+        {payload.map((entry, index) => (
+          <div key={index} className="flex items-center gap-2 text-sm">
+            <div
+              className="h-3 w-3 rounded-full"
+              style={{ backgroundColor: entry.color }}
+            />
+            <span style={{ color: 'var(--text-muted)' }}>{entry.name}:</span>
+            <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
+              {entry.value?.toLocaleString()}
+            </span>
+          </div>
+        ))}
+      </div>
+    )
+  }
+  return null
+}
+
 export function DownloadTrendComparison() {
   const [packages, setPackages] = useState<string[]>([])
   const [newPackage, setNewPackage] = useState('')
   const [trends, setTrends] = useState<PackageTrend[]>([])
   const [loading, setLoading] = useState(false)
-  const [chartData, setChartData] = useState<any[]>([])
   const [viewMode, setViewMode] = useState<'line' | 'area'>('line')
+  const [selectedRange, setSelectedRange] = useState<TimeRange>('30d')
 
   const addPackage = async () => {
     if (!newPackage.trim() || packages.includes(newPackage.trim().toLowerCase())) return
@@ -49,7 +87,7 @@ export function DownloadTrendComparison() {
     setLoading(true)
 
     try {
-      const data = await fetchDailyStats(pkgName, 30)
+      const data = await fetchDailyStats(pkgName)
       const color = COLORS[trends.length % COLORS.length]
       setTrends(prev => [...prev, { name: pkgName, data, color }])
     } catch (error) {
@@ -66,17 +104,27 @@ export function DownloadTrendComparison() {
     setTrends(newTrends)
   }
 
-  // Process data for chart
-  useEffect(() => {
-    if (trends.length === 0) {
-      setChartData([])
-      return
-    }
+  // Get the minimum data length across all trends to determine available ranges
+  const minDataLength = useMemo(() => {
+    if (trends.length === 0) return 0
+    return Math.min(...trends.map(t => t.data.data.length))
+  }, [trends])
 
-    // Get all unique dates
+  // Filter chart data based on selected range
+  const chartData = useMemo(() => {
+    if (trends.length === 0) return []
+
+    const rangeOption = TIME_RANGE_OPTIONS.find(r => r.value === selectedRange)
+    if (!rangeOption) return []
+
+    // Get the last N days of data
+    const daysToShow = Math.min(rangeOption.days, minDataLength)
+
+    // Get all unique dates from the filtered period
     const allDates = new Set<string>()
     trends.forEach(trend => {
-      trend.data.data.forEach(day => {
+      const filteredData = trend.data.data.slice(-daysToShow)
+      filteredData.forEach(day => {
         allDates.add(day.date)
       })
     })
@@ -85,8 +133,8 @@ export function DownloadTrendComparison() {
     const sortedDates = Array.from(allDates).sort()
 
     // Build chart data
-    const data = sortedDates.map(date => {
-      const point: any = { date }
+    const data: Record<string, number | string>[] = sortedDates.map(date => {
+      const point: Record<string, number | string> = { date }
       trends.forEach(trend => {
         const dayData = trend.data.data.find(d => d.date === date)
         point[trend.name] = dayData?.downloads || 0
@@ -94,26 +142,37 @@ export function DownloadTrendComparison() {
       return point
     })
 
-    setChartData(data)
-  }, [trends])
+    return data
+  }, [trends, selectedRange, minDataLength])
 
-  const calculateTrend = (trend: PackageTrend): { direction: 'up' | 'down' | 'stable'; percentage: number } => {
-    const data = trend.data.data
-    if (data.length < 2) return { direction: 'stable', percentage: 0 }
+  // Calculate filtered stats for each trend
+  const getFilteredStats = (trend: PackageTrend) => {
+    const rangeOption = TIME_RANGE_OPTIONS.find(r => r.value === selectedRange)
+    if (!rangeOption) return { total: 0, avg: 0, trend: { direction: 'stable' as const, percentage: 0 } }
 
-    const firstWeek = data.slice(0, 7).reduce((sum, d) => sum + d.downloads, 0) / 7
-    const lastWeek = data.slice(-7).reduce((sum, d) => sum + d.downloads, 0) / 7
+    const daysToShow = Math.min(rangeOption.days, trend.data.data.length)
+    const filteredData = trend.data.data.slice(-daysToShow)
 
-    if (firstWeek === 0) return { direction: 'stable', percentage: 0 }
+    const total = filteredData.reduce((sum, day) => sum + day.downloads, 0)
+    const avg = filteredData.length > 0 ? Math.round(total / filteredData.length) : 0
 
-    const change = ((lastWeek - firstWeek) / firstWeek) * 100
-    const direction = change > 5 ? 'up' : change < -5 ? 'down' : 'stable'
+    // Calculate trend
+    let direction: 'up' | 'down' | 'stable' = 'stable'
+    let percentage = 0
 
-    return { direction, percentage: Math.abs(change) }
-  }
+    if (filteredData.length >= 2) {
+      const halfLength = Math.floor(filteredData.length / 2)
+      const firstHalf = filteredData.slice(0, halfLength).reduce((sum, d) => sum + d.downloads, 0)
+      const secondHalf = filteredData.slice(halfLength).reduce((sum, d) => sum + d.downloads, 0)
 
-  const getTotalDownloads = (trend: PackageTrend): number => {
-    return trend.data.data.reduce((sum, day) => sum + day.downloads, 0)
+      if (firstHalf > 0) {
+        const change = ((secondHalf - firstHalf) / firstHalf) * 100
+        percentage = Math.abs(change)
+        direction = change > 5 ? 'up' : change < -5 ? 'down' : 'stable'
+      }
+    }
+
+    return { total, avg, trend: { direction, percentage } }
   }
 
   const exportData = () => {
@@ -130,6 +189,9 @@ export function DownloadTrendComparison() {
     a.click()
     URL.revokeObjectURL(url)
   }
+
+  const selectedOption = TIME_RANGE_OPTIONS.find(r => r.value === selectedRange)
+  const periodLabel = selectedOption?.label || 'Selected Period'
 
   return (
     <div className="space-y-6">
@@ -185,7 +247,35 @@ export function DownloadTrendComparison() {
 
       {/* Chart Controls */}
       {trends.length > 0 && (
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          {/* Time Range Filter */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>
+              Time Range:
+            </span>
+            <div className="flex flex-wrap gap-1">
+              {TIME_RANGE_OPTIONS.map(option => (
+                <button
+                  key={option.value}
+                  onClick={() => setSelectedRange(option.value)}
+                  disabled={minDataLength < option.days}
+                  className={`rounded-lg px-2 py-1 text-xs font-medium transition-colors ${
+                    selectedRange === option.value
+                      ? 'bg-(--accent) text-white'
+                      : 'bg-(--bg-tertiary) hover:bg-(--accent-light)'
+                  } ${minDataLength < option.days ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  style={{
+                    color: selectedRange === option.value ? 'white' : 'var(--text-secondary)',
+                  }}
+                  title={minDataLength < option.days ? 'Not enough data available' : ''}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* View Mode & Export */}
           <div className="flex items-center gap-2">
             <button
               onClick={() => setViewMode('line')}
@@ -207,15 +297,15 @@ export function DownloadTrendComparison() {
             >
               Area
             </button>
+            <button
+              onClick={exportData}
+              className="flex items-center gap-2 rounded-lg bg-(--bg-tertiary) px-3 py-1.5 text-sm transition-colors hover:bg-(--accent-light)"
+              style={{ color: 'var(--text-secondary)' }}
+            >
+              <Download className="h-4 w-4" />
+              Export CSV
+            </button>
           </div>
-          <button
-            onClick={exportData}
-            className="flex items-center gap-2 rounded-lg bg-(--bg-tertiary) px-3 py-1.5 text-sm transition-colors hover:bg-(--accent-light)"
-            style={{ color: 'var(--text-secondary)' }}
-          >
-            <Download className="h-4 w-4" />
-            Export CSV
-          </button>
         </div>
       )}
 
@@ -234,16 +324,15 @@ export function DownloadTrendComparison() {
                   tick={{ fill: 'var(--text-muted)', fontSize: 12 }}
                   tickFormatter={date => new Date(date).toLocaleDateString()}
                 />
-                <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 12 }} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'var(--bg-primary)',
-                    border: '1px solid var(--border)',
-                    borderRadius: '8px',
+                <YAxis 
+                  tick={{ fill: 'var(--text-muted)', fontSize: 12 }}
+                  tickFormatter={(value: number) => {
+                    if (value >= 1_000_000) return (value / 1_000_000).toFixed(1) + 'M'
+                    if (value >= 1_000) return (value / 1_000).toFixed(1) + 'k'
+                    return value.toString()
                   }}
-                  labelStyle={{ color: 'var(--text-primary)' }}
-                  itemStyle={{ color: 'var(--text-secondary)' }}
                 />
+                <Tooltip content={<CustomTooltip />} />
                 <Legend />
                 {trends.map((trend) => (
                   <Line
@@ -265,16 +354,15 @@ export function DownloadTrendComparison() {
                   tick={{ fill: 'var(--text-muted)', fontSize: 12 }}
                   tickFormatter={date => new Date(date).toLocaleDateString()}
                 />
-                <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 12 }} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'var(--bg-primary)',
-                    border: '1px solid var(--border)',
-                    borderRadius: '8px',
+                <YAxis 
+                  tick={{ fill: 'var(--text-muted)', fontSize: 12 }}
+                  tickFormatter={(value: number) => {
+                    if (value >= 1_000_000) return (value / 1_000_000).toFixed(1) + 'M'
+                    if (value >= 1_000) return (value / 1_000).toFixed(1) + 'k'
+                    return value.toString()
                   }}
-                  labelStyle={{ color: 'var(--text-primary)' }}
-                  itemStyle={{ color: 'var(--text-secondary)' }}
                 />
+                <Tooltip content={<CustomTooltip />} />
                 <Legend />
                 {trends.map((trend) => (
                   <Area
@@ -297,8 +385,7 @@ export function DownloadTrendComparison() {
       {trends.length > 0 && (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {trends.map((trend, index) => {
-            const trendInfo = calculateTrend(trend)
-            const total = getTotalDownloads(trend)
+            const stats = getFilteredStats(trend)
 
             return (
               <div
@@ -327,29 +414,29 @@ export function DownloadTrendComparison() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                      Total Downloads (30d)
+                      {periodLabel} Total
                     </span>
                     <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
-                      {total.toLocaleString()}
+                      <NumberDisplay value={stats.total} />
                     </span>
                   </div>
 
                   <div className="flex items-center justify-between">
                     <span className="text-sm" style={{ color: 'var(--text-muted)' }}>Trend</span>
                     <div className="flex items-center gap-1">
-                      {trendInfo.direction === 'up' && (
+                      {stats.trend.direction === 'up' && (
                         <>
                           <TrendingUp className="h-4 w-4" style={{ color: 'var(--success)' }} />
-                          <span style={{ color: 'var(--success)' }}>+{trendInfo.percentage.toFixed(1)}%</span>
+                          <span style={{ color: 'var(--success)' }}>+{stats.trend.percentage.toFixed(1)}%</span>
                         </>
                       )}
-                      {trendInfo.direction === 'down' && (
+                      {stats.trend.direction === 'down' && (
                         <>
                           <TrendingDown className="h-4 w-4" style={{ color: 'var(--error)' }} />
-                          <span style={{ color: 'var(--error)' }}>-{trendInfo.percentage.toFixed(1)}%</span>
+                          <span style={{ color: 'var(--error)' }}>-{stats.trend.percentage.toFixed(1)}%</span>
                         </>
                       )}
-                      {trendInfo.direction === 'stable' && (
+                      {stats.trend.direction === 'stable' && (
                         <>
                           <Minus className="h-4 w-4" style={{ color: 'var(--text-muted)' }} />
                           <span style={{ color: 'var(--text-muted)' }}>Stable</span>
@@ -363,7 +450,7 @@ export function DownloadTrendComparison() {
                       Daily Avg
                     </span>
                     <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
-                      {Math.round(total / 30).toLocaleString()}
+                      <NumberDisplay value={stats.avg} />
                     </span>
                   </div>
                 </div>
@@ -384,7 +471,7 @@ export function DownloadTrendComparison() {
             Compare Download Trends
           </p>
           <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-            Add packages above to compare their download statistics over the last 30 days
+            Add packages above to compare their download statistics
           </p>
         </div>
       )}

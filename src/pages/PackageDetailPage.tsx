@@ -117,6 +117,9 @@ export function PackageDetailPage() {
                     Compare
                   </Link>
                 )}
+                {data && (
+                  <MarkdownExportButton packageData={data} healthScore={health} variant="outline" />
+                )}
               </div>
             </div>
 
@@ -163,9 +166,8 @@ export function PackageDetailPage() {
 
             {/* Export Actions - shown when data is loaded */}
             {data && (
-              <div className="mt-8 flex flex-wrap items-center gap-4">
+              <div className="mt-8">
                 <ExportActions packageData={data} />
-                <MarkdownExportButton packageData={data} healthScore={health} variant="outline" />
               </div>
             )}
           </div>

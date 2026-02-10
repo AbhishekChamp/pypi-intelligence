@@ -21,6 +21,8 @@ import {
 export { useExportPackage } from './useExportPackage'
 export { useSearchHistory } from './useSearchHistory'
 export { useFavorites } from './useFavorites'
+export { useDownloadFilter, TIME_RANGE_OPTIONS } from './useDownloadFilter'
+export type { TimeRange } from './useDownloadFilter'
 
 // Hook for fetching package data
 export function usePackageData(packageName: string | null) {
@@ -312,7 +314,7 @@ export function useDownloadStats(packageName: string | null) {
       try {
         const [recent, daily] = await Promise.all([
           fetchDownloadStats(packageName!),
-          fetchDailyStats(packageName!, 30),
+          fetchDailyStats(packageName!),
         ])
 
         if (cancelled) return
@@ -323,10 +325,11 @@ export function useDownloadStats(packageName: string | null) {
             downloads: d.downloads,
           })) || []
 
-        // Calculate trend using last 7 days vs previous 7 days
-        const last7Days = history.slice(-7).reduce((sum, d) => sum + d.downloads, 0)
-        const prev7Days = history.slice(-14, -7).reduce((sum, d) => sum + d.downloads, 0)
-        const { trend, percentage } = calculateTrendPercentage(last7Days, prev7Days)
+        // Calculate trend using first half vs second half of available history
+        const halfLength = Math.floor(history.length / 2)
+        const firstHalf = history.slice(0, halfLength).reduce((sum, d) => sum + d.downloads, 0)
+        const secondHalf = history.slice(halfLength).reduce((sum, d) => sum + d.downloads, 0)
+        const { trend, percentage } = calculateTrendPercentage(secondHalf, firstHalf)
 
         setStats({
           daily: recent.data.last_day,

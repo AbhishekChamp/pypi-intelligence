@@ -1,4 +1,6 @@
 import { formatNumber, cn } from '@/utils'
+import { StatCardWithNumber, NumberDisplay } from './NumberDisplay'
+import { useDownloadFilter, TIME_RANGE_OPTIONS } from '@/hooks'
 import type { DownloadStats } from '@/types'
 import {
   TrendingUp,
@@ -14,7 +16,7 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
+  Tooltip as RechartsTooltip,
   ResponsiveContainer,
 } from 'recharts'
 
@@ -23,7 +25,35 @@ interface DownloadsTabProps {
   loading?: boolean
 }
 
+// Custom tooltip component for the chart
+function CustomTooltip({ active, payload, label }: {
+  active?: boolean
+  payload?: Array<{ value: number }>
+  label?: string
+}) {
+  if (active && payload && payload.length) {
+    const value = payload[0].value
+    return (
+      <div
+        className="rounded-md px-3 py-2 shadow-lg"
+        style={{
+          backgroundColor: 'var(--card-bg)',
+          border: '1px solid var(--border)',
+        }}
+      >
+        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{label}</p>
+        <p className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
+          {value.toLocaleString()} Downloads
+        </p>
+      </div>
+    )
+  }
+  return null
+}
+
 export function DownloadsTab({ stats, loading }: DownloadsTabProps) {
+  const { selectedRange, setSelectedRange, filteredStats } = useDownloadFilter(stats)
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -37,7 +67,7 @@ export function DownloadsTab({ stats, loading }: DownloadsTabProps) {
     )
   }
 
-  if (!stats) {
+  if (!stats || !filteredStats) {
     return (
       <div className="rounded-lg p-8 text-center" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
         <p style={{ color: 'var(--text-muted)' }}>No download statistics available</p>
@@ -46,37 +76,77 @@ export function DownloadsTab({ stats, loading }: DownloadsTabProps) {
   }
 
   const trendIcon =
-    stats.trend === 'up' ? (
+    filteredStats.trend === 'up' ? (
       <TrendingUp className="h-5 w-5" style={{ color: 'var(--success)' }} />
-    ) : stats.trend === 'down' ? (
+    ) : filteredStats.trend === 'down' ? (
       <TrendingDown className="h-5 w-5" style={{ color: 'var(--error)' }} />
     ) : (
       <Minus className="h-5 w-5" style={{ color: 'var(--text-muted)' }} />
     )
 
-  const chartData = stats.history.map(h => ({
+  const chartData = filteredStats.history.map(h => ({
     date: new Date(h.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
     downloads: h.downloads,
   }))
 
+  const selectedOption = TIME_RANGE_OPTIONS.find(r => r.value === selectedRange)
+  const periodLabel = selectedOption?.label || 'Selected Period'
+
   return (
     <div className="space-y-6">
+      {/* Time Range Filter */}
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>
+          Time Range:
+        </span>
+        <div className="flex flex-wrap gap-1">
+          {TIME_RANGE_OPTIONS.map(option => (
+            <button
+              key={option.value}
+              onClick={() => setSelectedRange(option.value)}
+              disabled={stats.history.length < option.days}
+              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                selectedRange === option.value
+                  ? 'bg-(--accent) text-white'
+                  : 'bg-(--bg-tertiary) hover:bg-(--accent-light)'
+              } ${stats.history.length < option.days ? 'opacity-50 cursor-not-allowed' : ''}`}
+              style={{
+                color: selectedRange === option.value ? 'white' : 'var(--text-secondary)',
+              }}
+              title={stats.history.length < option.days ? 'Not enough data available' : ''}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Stats Grid */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard
-          icon={<Download className="h-5 w-5 text-blue-500" />}
-          label="Daily Downloads"
-          value={formatNumber(stats.daily)}
-        />
-        <StatCard
+        <div 
+          className="rounded-lg p-4 shadow-sm" 
+          style={{ backgroundColor: 'var(--card-bg)' }}
+        >
+          <div className="mb-2 flex items-center gap-2">
+            <Download className="h-5 w-5 text-blue-500" />
+            <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
+              {periodLabel} Total
+            </span>
+          </div>
+          <NumberDisplay 
+            value={filteredStats.total} 
+            className="text-2xl font-bold"
+          />
+        </div>
+        <StatCardWithNumber
           icon={<Calendar className="h-5 w-5 text-purple-500" />}
-          label="Weekly Downloads"
-          value={formatNumber(stats.weekly)}
+          label="Last 7 Days"
+          value={stats.weekly}
         />
-        <StatCard
+        <StatCardWithNumber
           icon={<Activity className="h-5 w-5 text-green-500" />}
-          label="Monthly Downloads"
-          value={formatNumber(stats.monthly)}
+          label="Last 30 Days"
+          value={stats.monthly}
         />
       </div>
 
@@ -88,22 +158,22 @@ export function DownloadsTab({ stats, loading }: DownloadsTabProps) {
               'flex h-12 w-12 items-center justify-center rounded-full'
             )}
             style={{
-              backgroundColor: stats.trend === 'up' ? 'var(--success-light)' : stats.trend === 'down' ? 'var(--error-light)' : 'var(--bg-tertiary)'
+              backgroundColor: filteredStats.trend === 'up' ? 'var(--success-light)' : filteredStats.trend === 'down' ? 'var(--error-light)' : 'var(--bg-tertiary)'
             }}
           >
             {trendIcon}
           </div>
           <div>
-            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>30-Day Trend</p>
+            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{periodLabel} Trend</p>
             <p
               className="text-lg font-semibold"
               style={{
-                color: stats.trend === 'up' ? 'var(--success)' : stats.trend === 'down' ? 'var(--error)' : 'var(--text-secondary)'
+                color: filteredStats.trend === 'up' ? 'var(--success)' : filteredStats.trend === 'down' ? 'var(--error)' : 'var(--text-secondary)'
               }}
             >
-              {stats.trend === 'up' && '↑'}
-              {stats.trend === 'down' && '↓'}
-              {stats.trend === 'stable' && '→'} {stats.trendPercentage.toFixed(1)}%
+              {filteredStats.trend === 'up' && '↑'}
+              {filteredStats.trend === 'down' && '↓'}
+              {filteredStats.trend === 'stable' && '→'} {filteredStats.trendPercentage.toFixed(1)}%
             </p>
           </div>
         </div>
@@ -112,7 +182,9 @@ export function DownloadsTab({ stats, loading }: DownloadsTabProps) {
       {/* Chart */}
       {chartData.length > 0 ? (
         <div className="rounded-lg p-6 shadow-sm" style={{ backgroundColor: 'var(--card-bg)' }}>
-          <h3 className="mb-4 text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Download History (30 Days)</h3>
+          <h3 className="mb-4 text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
+            Download History ({periodLabel})
+          </h3>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData}>
@@ -126,15 +198,7 @@ export function DownloadsTab({ stats, loading }: DownloadsTabProps) {
                   tick={{ fill: 'var(--text-muted)', fontSize: 12 }}
                   tickFormatter={(value: number) => formatNumber(value)}
                 />
-                <Tooltip
-                  formatter={(value: number) => [formatNumber(value), 'Downloads']}
-                  contentStyle={{
-                    backgroundColor: 'var(--card-bg)',
-                    border: '1px solid var(--border)',
-                    borderRadius: '6px',
-                    color: 'var(--text-primary)'
-                  }}
-                />
+                <RechartsTooltip content={<CustomTooltip />} />
                 <Line
                   type="monotone"
                   dataKey="downloads"
@@ -153,26 +217,6 @@ export function DownloadsTab({ stats, loading }: DownloadsTabProps) {
           <p className="mt-1 text-sm" style={{ color: 'var(--text-muted)' }}>Historical data temporarily unavailable</p>
         </div>
       )}
-    </div>
-  )
-}
-
-function StatCard({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode
-  label: string
-  value: string
-}) {
-  return (
-    <div className="rounded-lg p-4 shadow-sm" style={{ backgroundColor: 'var(--card-bg)' }}>
-      <div className="mb-2 flex items-center gap-2">
-        {icon}
-        <span className="text-sm" style={{ color: 'var(--text-muted)' }}>{label}</span>
-      </div>
-      <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{value}</p>
     </div>
   )
 }
