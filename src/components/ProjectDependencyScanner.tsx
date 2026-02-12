@@ -32,13 +32,23 @@ export function ProjectDependencyScanner() {
       if (!trimmed || trimmed.startsWith('#') || trimmed.startsWith('-')) continue
 
       // Parse package specifications
-      // Handle formats: package, package==1.0, package>=1.0, package~=1.0, package[extra], package[extra]==1.0
-      const match = trimmed.match(/^([a-zA-Z0-9_-]+)(?:\[[^\]]+\])?(.*)$/)
+      // Handle formats: 
+      // - package
+      // - package==1.0, package>=1.0, package~=1.0, package<=1.0, package>1.0, package<1.0, package!=1.0
+      // - package[extra], package[extra]==1.0
+      // - package.name (with dots)
+      // - package-name (with hyphens)
+      // - package_name (with underscores)
+      // Handle inline comments and environment markers
+      const cleanLine = trimmed.split(';')[0].split('#')[0].trim()
+      
+      // Match package name (including dots, hyphens, underscores) and optional version spec
+      const match = cleanLine.match(/^([a-zA-Z0-9][a-zA-Z0-9._-]*)(?:\[[^\]]+\])?\s*(.*)$/)
       if (match) {
         const name = match[1]
         const spec = match[2].trim()
-        // Extract version from specifier if present
-        const versionMatch = spec.match(/==\s*([^\s;]+)/)
+        // Extract version from any specifier (==, >=, <=, >, <, ~=, !=)
+        const versionMatch = spec.match(/(?:==|>=|<=|>|<|~=|!=)\s*([^\s,;]+)/)
         packages.push({
           name,
           version: versionMatch ? versionMatch[1] : undefined
@@ -52,9 +62,12 @@ export function ProjectDependencyScanner() {
   const parsePyProjectToml = async (content: string): Promise<Array<{ name: string; version?: string }>> => {
     const packages: Array<{ name: string; version?: string }> = []
     
-    // Simple regex-based parsing for dependencies
-    // Match poetry/pdm format: package = "^1.0" or package = {version = "^1.0"}
-    const depRegex = /^([a-zA-Z0-9_-]+)\s*=\s*(?:"([^"]+)"|\{[^}]*version\s*=\s*"([^"]+)"[^}]*\})/gm
+    // Match poetry/pdm/pipenv format: 
+    // package = "^1.0" or package = '>=1.0' (single or double quotes)
+    // package = {version = "^1.0"} or package = {version = '>=1.0'}
+    // package = {version = "^1.0", optional = true}
+    // Handle both single and double quotes, and more complex version specs
+    const depRegex = /^([a-zA-Z0-9._-]+)\s*=\s*(?:["']([^"']+)["']|\{[^}]*version\s*=\s*["']([^"']+)["'][^}]*\})/gm
     let match
     
     while ((match = depRegex.exec(content)) !== null) {
@@ -64,15 +77,37 @@ export function ProjectDependencyScanner() {
       })
     }
 
-    // Also try to match PEP 621 format: dependencies = ["package==1.0"]
-    const arrayDepsMatch = content.match(/dependencies\s*=\s*\[([^\]]+)\]/s)
-    if (arrayDepsMatch) {
-      const depsString = arrayDepsMatch[1]
-      const depMatches = depsString.matchAll(/"([^"]+)"/g)
+    // Match PEP 621 format: dependencies = ["package==1.0", 'package>=1.0']
+    // Look for dependencies arrays in various sections
+    const depsArrayRegex = /dependencies\s*=\s*\[([\s\S]*?)\]/g
+    let arrayMatch
+    
+    while ((arrayMatch = depsArrayRegex.exec(content)) !== null) {
+      const depsString = arrayMatch[1]
+      // Match both single and double quoted strings
+      const depMatches = depsString.matchAll(/["']([^"']+)["']/g)
       for (const depMatch of depMatches) {
         const dep = depMatch[1]
         const parsed = await parseRequirementsFile(dep)
         packages.push(...parsed)
+      }
+    }
+
+    // Match dev-dependencies, optional-dependencies, etc.
+    const extraDepsRegex = /(?:dev-dependencies|optional-dependencies|group\.\w+\.dependencies)\s*=\s*\{([\s\S]*?)\}/g
+    let extraMatch
+    
+    while ((extraMatch = extraDepsRegex.exec(content)) !== null) {
+      const depsBlock = extraMatch[1]
+      // Parse inline table format: package = "version"
+      const inlineDepRegex = /([a-zA-Z0-9._-]+)\s*=\s*["']([^"']+)["']/g
+      let inlineMatch
+      
+      while ((inlineMatch = inlineDepRegex.exec(depsBlock)) !== null) {
+        packages.push({
+          name: inlineMatch[1],
+          version: inlineMatch[2] || undefined
+        })
       }
     }
 

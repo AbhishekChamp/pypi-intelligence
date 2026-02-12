@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
+import { QueryProvider } from './providers/QueryProvider.tsx'
 
 // Validate root element exists before rendering
 const rootElement = document.getElementById('root')
@@ -42,7 +43,9 @@ if (!rootElement) {
   try {
     createRoot(rootElement).render(
       <StrictMode>
-        <App />
+        <QueryProvider>
+          <App />
+        </QueryProvider>
       </StrictMode>,
     )
   } catch (error) {

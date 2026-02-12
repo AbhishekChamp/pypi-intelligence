@@ -3,16 +3,20 @@ import { Layout } from '@/components/Layout'
 import { ProjectDependencyScanner } from '@/components/ProjectDependencyScanner'
 import { DownloadTrendComparison } from '@/components/DownloadTrendComparison'
 import { RequirementsGenerator } from '@/components/RequirementsGenerator'
+import { SBOMGenerator } from '@/components/SBOMGenerator'
+import { VirtualEnvironmentAnalyzer } from '@/components/VirtualEnvironmentAnalyzer'
 import { 
   Scan, 
   TrendingUp, 
   FileCode, 
   ArrowLeft,
-  Wrench
+  Wrench,
+  FileJson,
+  Terminal
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
-type ToolId = 'scanner' | 'trends' | 'generator'
+type ToolId = 'scanner' | 'trends' | 'generator' | 'sbom' | 'venv-analyzer'
 
 const tools = [
   {
@@ -35,6 +39,20 @@ const tools = [
     description: 'Build requirements files for pip, Poetry, PDM, and Pipenv',
     icon: FileCode,
     component: RequirementsGenerator,
+  },
+  {
+    id: 'sbom' as ToolId,
+    name: 'SBOM Generator',
+    description: 'Generate Software Bill of Materials in SPDX or CycloneDX format',
+    icon: FileJson,
+    component: SBOMGenerator,
+  },
+  {
+    id: 'venv-analyzer' as ToolId,
+    name: 'Virtual Environment Analyzer',
+    description: 'Analyze pip freeze output for outdated and vulnerable packages',
+    icon: Terminal,
+    component: VirtualEnvironmentAnalyzer,
   },
 ]
 

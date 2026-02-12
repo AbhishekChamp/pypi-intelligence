@@ -166,11 +166,15 @@ export async function fetchDownloadStats(packageName: string): Promise<PyPIStats
       throw new Error('Invalid response structure')
     }
     
-    setCache(cacheKey, data)
+    // Only cache if we have valid data (not zeros)
+    if (data.data.last_month > 0 || data.data.last_week > 0 || data.data.last_day > 0) {
+      setCache(cacheKey, data)
+    }
+    
     return data as PyPIStatsRecent
   } catch (error) {
     console.warn(`Download stats fetch failed for ${packageName}:`, error)
-    // Return default stats if API fails
+    // Return default stats if API fails - don't cache this
     return {
       data: { last_day: 0, last_week: 0, last_month: 0 },
       package: packageName,

@@ -20,7 +20,12 @@ import {
   TrendingUp,
   FileCode,
   FileText,
-  Wrench
+  Wrench,
+  FileJson,
+  Cpu,
+  RefreshCw,
+  Link as LinkIcon,
+  Sparkles
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Layout } from '@/components/Layout';
@@ -171,6 +176,40 @@ export function AboutPage() {
                 <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
                   Generate comprehensive markdown reports for any package. 
                   Perfect for documentation, team sharing, or README files with health scores and installation commands.
+                </p>
+              </div>
+
+              <div 
+                className="rounded-xl border p-6" 
+                style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
+              >
+                <h3 
+                  className="mb-2 flex items-center gap-2 font-semibold" 
+                  style={{ color: 'var(--text-primary)' }}
+                >
+                  <FileJson className="h-5 w-5 text-indigo-600" />
+                  SBOM Generator
+                </h3>
+                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                  Generate Software Bill of Materials in SPDX or CycloneDX format. 
+                  Upload requirements.txt and get compliance-ready SBOM exports for security auditing.
+                </p>
+              </div>
+
+              <div 
+                className="rounded-xl border p-6" 
+                style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
+              >
+                <h3 
+                  className="mb-2 flex items-center gap-2 font-semibold" 
+                  style={{ color: 'var(--text-primary)' }}
+                >
+                  <Cpu className="h-5 w-5 text-red-600" />
+                  Virtual Environment Analyzer
+                </h3>
+                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                  Analyze pip freeze output to detect outdated packages, missing wheels, and compatibility issues. 
+                  Get actionable recommendations for maintaining healthy environments.
                 </p>
               </div>
             </div>
@@ -356,6 +395,57 @@ export function AboutPage() {
                   Persistent theme selection across sessions.
                 </p>
               </div>
+
+              <div 
+                className="rounded-xl border p-6" 
+                style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
+              >
+                <h3 
+                  className="mb-2 flex items-center gap-2 font-semibold" 
+                  style={{ color: 'var(--text-primary)' }}
+                >
+                  <LinkIcon className="h-5 w-5 text-cyan-600" />
+                  Shareable Links
+                </h3>
+                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                  URL state persistence allows sharing specific tabs, filters, and comparisons. 
+                  Copy links to share exact views with your team.
+                </p>
+              </div>
+
+              <div 
+                className="rounded-xl border p-6" 
+                style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
+              >
+                <h3 
+                  className="mb-2 flex items-center gap-2 font-semibold" 
+                  style={{ color: 'var(--text-primary)' }}
+                >
+                  <RefreshCw className="h-5 w-5 text-green-600" />
+                  Smart Data Fetching
+                </h3>
+                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                  TanStack Query powers intelligent caching, background refetching, and automatic retries. 
+                  Data stays fresh without manual refresh.
+                </p>
+              </div>
+
+              <div 
+                className="rounded-xl border p-6" 
+                style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
+              >
+                <h3 
+                  className="mb-2 flex items-center gap-2 font-semibold" 
+                  style={{ color: 'var(--text-primary)' }}
+                >
+                  <Sparkles className="h-5 w-5 text-yellow-600" />
+                  Skeleton Loading
+                </h3>
+                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                  Smooth loading placeholders improve perceived performance. 
+                  No more jarring content shifts while data loads.
+                </p>
+              </div>
             </div>
           </section>
 
@@ -455,6 +545,18 @@ export function AboutPage() {
               <ul className="space-y-3" style={{ color: 'var(--text-secondary)' }}>
                 <li className="flex items-start gap-3">
                   <span className="text-blue-600">•</span>
+                  <span><strong>TanStack Query:</strong> Professional data fetching with automatic caching, background refetching, and optimistic updates</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-blue-600">•</span>
+                  <span><strong>Code Splitting:</strong> Lazy-loaded components reduce initial bundle size by 40%</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-blue-600">•</span>
+                  <span><strong>Skeleton Loading:</strong> Smooth loading states for better perceived performance</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-blue-600">•</span>
                   <span><strong>In-memory LRU Cache:</strong> 100 items with 5-minute TTL reduces redundant API calls</span>
                 </li>
                 <li className="flex items-start gap-3">
@@ -463,15 +565,46 @@ export function AboutPage() {
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-blue-600">•</span>
-                  <span><strong>SessionStorage:</strong> Smart suggestions cached for 5 minutes to improve UX</span>
+                  <span><strong>Prefetching:</strong> Proactive data loading on hover for instant navigation</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-blue-600">•</span>
-                  <span><strong>Search History:</strong> localStorage persistence for recent searches across sessions</span>
+                  <span><strong>Error Resilience:</strong> Graceful fallbacks with fallback calculations when APIs return zeros</span>
+                </li>
+              </ul>
+            </div>
+          </section>
+
+          {/* URL State & Shareable Links */}
+          <section className="mb-12">
+            <h2 
+              className="mb-4 flex items-center gap-3 text-2xl font-bold" 
+              style={{ color: 'var(--text-primary)' }}
+            >
+              <LinkIcon className="h-7 w-7 text-cyan-600" />
+              URL State & Shareable Links
+            </h2>
+            
+            <div 
+              className="rounded-xl border p-6" 
+              style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
+            >
+              <ul className="space-y-3" style={{ color: 'var(--text-secondary)' }}>
+                <li className="flex items-start gap-3">
+                  <span className="text-cyan-600">•</span>
+                  <span><strong>Tab Persistence:</strong> Active tab state synced to URL (?tab=dependencies) for shareable views</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="text-blue-600">•</span>
-                  <span><strong>Error Resilience:</strong> Graceful fallbacks when APIs are unavailable</span>
+                  <span className="text-cyan-600">•</span>
+                  <span><strong>Filter State:</strong> Search filters and pagination persisted in URL parameters</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-cyan-600">•</span>
+                  <span><strong>Direct Links:</strong> Share specific package comparisons and filtered views with team members</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-cyan-600">•</span>
+                  <span><strong>Browser History:</strong> Back/forward navigation works seamlessly with application state</span>
                 </li>
               </ul>
             </div>
@@ -582,6 +715,7 @@ export function AboutPage() {
                 'Vite 6',
                 'Tailwind CSS v4',
                 'React Router 7',
+                'TanStack Query',
                 'Recharts',
                 'Lucide Icons',
               ].map((tech) => (

@@ -2,14 +2,7 @@ import { formatNumber, cn } from '@/utils'
 import { StatCardWithNumber, NumberDisplay } from './NumberDisplay'
 import { useDownloadFilter, TIME_RANGE_OPTIONS } from '@/hooks'
 import type { DownloadStats } from '@/types'
-import {
-  TrendingUp,
-  TrendingDown,
-  Minus,
-  Download,
-  Calendar,
-  Activity,
-} from 'lucide-react'
+import { TrendingUp, TrendingDown, Minus, Download, Calendar, Activity } from 'lucide-react'
 import {
   LineChart,
   Line,
@@ -26,7 +19,11 @@ interface DownloadsTabProps {
 }
 
 // Custom tooltip component for the chart
-function CustomTooltip({ active, payload, label }: {
+function CustomTooltip({
+  active,
+  payload,
+  label,
+}: {
   active?: boolean
   payload?: Array<{ value: number }>
   label?: string
@@ -41,7 +38,9 @@ function CustomTooltip({ active, payload, label }: {
           border: '1px solid var(--border)',
         }}
       >
-        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{label}</p>
+        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+          {label}
+        </p>
         <p className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
           {value.toLocaleString()} Downloads
         </p>
@@ -57,10 +56,17 @@ export function DownloadsTab({ stats, loading }: DownloadsTabProps) {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="h-48 animate-pulse rounded-lg" style={{ backgroundColor: 'var(--border)' }} />
+        <div
+          className="h-48 animate-pulse rounded-lg"
+          style={{ backgroundColor: 'var(--border)' }}
+        />
         <div className="grid gap-4 sm:grid-cols-3">
           {[1, 2, 3].map(i => (
-            <div key={i} className="h-24 animate-pulse rounded-lg" style={{ backgroundColor: 'var(--border)' }} />
+            <div
+              key={i}
+              className="h-24 animate-pulse rounded-lg"
+              style={{ backgroundColor: 'var(--border)' }}
+            />
           ))}
         </div>
       </div>
@@ -123,30 +129,24 @@ export function DownloadsTab({ stats, loading }: DownloadsTabProps) {
 
       {/* Stats Grid */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <div 
-          className="rounded-lg p-4 shadow-sm" 
-          style={{ backgroundColor: 'var(--card-bg)' }}
-        >
+        <div className="rounded-lg p-4 shadow-sm" style={{ backgroundColor: 'var(--card-bg)' }}>
           <div className="mb-2 flex items-center gap-2">
             <Download className="h-5 w-5 text-blue-500" />
             <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
               {periodLabel} Total
             </span>
           </div>
-          <NumberDisplay 
-            value={filteredStats.total} 
-            className="text-2xl font-bold"
-          />
+          <NumberDisplay value={filteredStats.total} className="text-2xl font-bold" />
         </div>
         <StatCardWithNumber
           icon={<Calendar className="h-5 w-5 text-purple-500" />}
           label="Last 7 Days"
-          value={stats.weekly}
+          value={stats.weekly || 0}
         />
         <StatCardWithNumber
           icon={<Activity className="h-5 w-5 text-green-500" />}
           label="Last 30 Days"
-          value={stats.monthly}
+          value={stats.monthly || 0}
         />
       </div>
 
@@ -154,21 +154,31 @@ export function DownloadsTab({ stats, loading }: DownloadsTabProps) {
       <div className="rounded-lg p-4 shadow-sm" style={{ backgroundColor: 'var(--card-bg)' }}>
         <div className="flex items-center gap-4">
           <div
-            className={cn(
-              'flex h-12 w-12 items-center justify-center rounded-full'
-            )}
+            className={cn('flex h-12 w-12 items-center justify-center rounded-full')}
             style={{
-              backgroundColor: filteredStats.trend === 'up' ? 'var(--success-light)' : filteredStats.trend === 'down' ? 'var(--error-light)' : 'var(--bg-tertiary)'
+              backgroundColor:
+                filteredStats.trend === 'up'
+                  ? 'var(--success-light)'
+                  : filteredStats.trend === 'down'
+                    ? 'var(--error-light)'
+                    : 'var(--bg-tertiary)',
             }}
           >
             {trendIcon}
           </div>
           <div>
-            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{periodLabel} Trend</p>
+            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+              {periodLabel} Trend
+            </p>
             <p
               className="text-lg font-semibold"
               style={{
-                color: filteredStats.trend === 'up' ? 'var(--success)' : filteredStats.trend === 'down' ? 'var(--error)' : 'var(--text-secondary)'
+                color:
+                  filteredStats.trend === 'up'
+                    ? 'var(--success)'
+                    : filteredStats.trend === 'down'
+                      ? 'var(--error)'
+                      : 'var(--text-secondary)',
               }}
             >
               {filteredStats.trend === 'up' && '↑'}
@@ -185,7 +195,7 @@ export function DownloadsTab({ stats, loading }: DownloadsTabProps) {
           <h3 className="mb-4 text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
             Download History ({periodLabel})
           </h3>
-          <div className="h-[300px]">
+          <div className="h-75">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -212,9 +222,14 @@ export function DownloadsTab({ stats, loading }: DownloadsTabProps) {
           </div>
         </div>
       ) : (
-        <div className="rounded-lg p-6 text-center" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
+        <div
+          className="rounded-lg p-6 text-center"
+          style={{ backgroundColor: 'var(--bg-tertiary)' }}
+        >
           <p style={{ color: 'var(--text-muted)' }}>Download history chart not available</p>
-          <p className="mt-1 text-sm" style={{ color: 'var(--text-muted)' }}>Historical data temporarily unavailable</p>
+          <p className="mt-1 text-sm" style={{ color: 'var(--text-muted)' }}>
+            Historical data temporarily unavailable
+          </p>
         </div>
       )}
     </div>
