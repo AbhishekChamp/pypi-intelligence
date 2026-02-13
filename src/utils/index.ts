@@ -366,3 +366,18 @@ export {
   isLikelyTypo,
   getCorrectedPackageName,
 } from './packageNames'
+
+// Re-export GitHub scraper utilities
+export {
+  parseGitHubUrl,
+  extractGitHubUrl,
+  extractChangelogUrl,
+  fetchChangelogFromGitHub,
+  fetchChangelogFromUrl,
+  generateFallbackChangelog,
+  normalizeLicense,
+  checkLicenseCompatibility,
+  analyzeBundleStats,
+  hasTypeStubs,
+  calculateUpdateRecommendation,
+} from './githubScraper'

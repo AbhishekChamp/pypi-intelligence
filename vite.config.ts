@@ -19,6 +19,16 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/pypistats/, '/api'),
       },
+      '/api/github': {
+        target: 'https://raw.githubusercontent.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/github/, ''),
+      },
+      '/api/pypi-raw': {
+        target: 'https://pypi.org',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/pypi-raw/, ''),
+      },
     },
   },
   build: {

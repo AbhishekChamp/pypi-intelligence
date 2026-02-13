@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Package, Github, Info, Wrench } from 'lucide-react'
+import { Package, Github, Info, Wrench, Folder } from 'lucide-react'
 import { ThemeToggle } from './ThemeToggle'
 
 export function Header() {
@@ -21,6 +21,14 @@ export function Header() {
           </div>
         </Link>
         <div className="flex items-center gap-4">
+          <Link
+            to="/projects"
+            className="flex items-center gap-2 rounded-lg p-2 transition-colors hover:bg-(--bg-tertiary)"
+            style={{ color: 'var(--text-secondary)' }}
+          >
+            <Folder className="h-5 w-5" />
+            <span className="hidden sm:inline">Projects</span>
+          </Link>
           <Link
             to="/tools"
             className="flex items-center gap-2 rounded-lg p-2 transition-colors hover:bg-(--bg-tertiary)"

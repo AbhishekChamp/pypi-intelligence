@@ -1,4 +1,4 @@
-import type { PyPIPackage, PyPIStatsRecent, PyPIStatsDaily } from '@/types'
+import type { PyPIPackage, PyPIStatsRecent, PyPIStatsDaily, ChangelogData } from '@/types'
 import { getPackageSuggestions } from '@/utils'
 
 const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
@@ -441,5 +441,74 @@ export function calculateDependencyStats(dependencies: DependencyNode[]): {
     transitive,
     optional,
     withErrors,
+  }
+}
+
+// Import GitHub scraper utilities
+import {
+  extractGitHubUrl,
+  extractChangelogUrl,
+  fetchChangelogFromGitHub,
+  fetchChangelogFromUrl,
+  generateFallbackChangelog,
+  parseGitHubUrl,
+} from '@/utils/githubScraper'
+
+// Fetch changelog for a package with fallback chain:
+// 1. Try project.urls changelog URL
+// 2. Try GitHub repository changelog files
+// 3. Fallback to PyPI release history
+export async function fetchChangelog(packageName: string, packageData: PyPIPackage): Promise<ChangelogData> {
+  const cacheKey = `changelog:${packageName.toLowerCase()}`
+  const cached = getCached<ChangelogData>(cacheKey)
+  if (cached) return cached
+
+  try {
+    // Step 1: Try project.urls changelog URL first
+    const changelogUrl = extractChangelogUrl(packageData.info.project_urls || {})
+    
+    if (changelogUrl) {
+      try {
+        const changelog = await fetchChangelogFromUrl(changelogUrl)
+        setCache(cacheKey, changelog)
+        return changelog
+      } catch (error) {
+        console.warn(`Project.urls changelog fetch failed for ${packageName}:`, error)
+        // Continue to next fallback
+      }
+    }
+    
+    // Step 2: Try GitHub repository changelog files
+    const githubUrl = extractGitHubUrl(packageData.info.project_urls || {})
+    
+    if (githubUrl) {
+      const githubInfo = parseGitHubUrl(githubUrl)
+      if (githubInfo) {
+        try {
+          const changelog = await fetchChangelogFromGitHub(githubInfo.owner, githubInfo.repo)
+          setCache(cacheKey, changelog)
+          return changelog
+        } catch (error) {
+          console.warn(`GitHub changelog fetch failed for ${packageName}:`, error)
+          // Continue to final fallback
+        }
+      }
+    }
+    
+    // Step 3: Final fallback to PyPI release history
+    const fallbackChangelog = generateFallbackChangelog(
+      packageData.releases,
+      packageData.info.version
+    )
+    setCache(cacheKey, fallbackChangelog)
+    return fallbackChangelog
+  } catch (error) {
+    console.warn(`Failed to fetch changelog for ${packageName}:`, error)
+    // Return empty changelog with error
+    return {
+      entries: [],
+      source: 'fallback',
+      error: 'Failed to load changelog. Please check the project repository directly.',
+    }
   }
 }

@@ -8,7 +8,7 @@ import {
   useSearchHistory,
   useFavorites,
 } from '@/hooks'
-import { usePackageDataQuery, useDownloadStatsQuery, useDailyStatsQuery } from '@/hooks/useQueryHooks'
+import { usePackageDataQuery, useDownloadStatsQuery, useDailyStatsQuery, useChangelogQuery } from '@/hooks/useQueryHooks'
 import { usePackageSuggestions } from '@/hooks/usePackageSuggestions'
 import { useURLState } from '@/hooks/useURLState'
 import { Layout } from '@/components/Layout'
@@ -18,6 +18,7 @@ import { ErrorDisplay } from '@/components/ErrorDisplay'
 import { PackageOverviewSkeleton, TabContentSkeleton } from '@/components/Skeleton'
 import type { TabId, DownloadStats } from '@/types'
 import { ArrowLeft, GitCompare, Heart } from 'lucide-react'
+import { extractGitHubUrl, analyzeBundleStats } from '@/utils'
 
 // Lazy load heavy components
 const OverviewTab = lazy(() => import('@/components/OverviewTab').then(m => ({ default: m.OverviewTab })))
@@ -30,6 +31,8 @@ const SecurityTab = lazy(() => import('@/components/SecurityTab').then(m => ({ d
 const DependenciesTab = lazy(() => import('@/components/DependenciesTab').then(m => ({ default: m.DependenciesTab })))
 const ExportActions = lazy(() => import('@/components/ExportActions').then(m => ({ default: m.ExportActions })))
 const MarkdownExportButton = lazy(() => import('@/components/MarkdownExport').then(m => ({ default: m.MarkdownExportButton })))
+const ChangelogTab = lazy(() => import('@/components/ChangelogTab').then(m => ({ default: m.ChangelogTab })))
+const BundleAnalysisTab = lazy(() => import('@/components/BundleAnalysisTab').then(m => ({ default: m.BundleAnalysisTab })))
 
 export function PackageDetailPage() {
   const { packageName } = useParams<{ packageName: string }>()
@@ -108,6 +111,15 @@ export function PackageDetailPage() {
   const health = useHealthScore(overview, compatibility, stats)
   const { addToHistory } = useSearchHistory()
   const { toggleFavorite, isFavorite } = useFavorites()
+  
+  // Fetch changelog
+  const { data: changelog, isLoading: changelogLoading, error: changelogError } = useChangelogQuery(
+    packageName || null,
+    packageData || null
+  )
+  
+  // Get GitHub URL for changelog
+  const githubUrl = packageData ? extractGitHubUrl(packageData.info.project_urls || {}) : null
 
   // Add to history when package loads successfully
   useEffect(() => {
@@ -235,6 +247,22 @@ export function PackageDetailPage() {
                   />
                 )}
                 {activeTab === 'install' && <InstallationTab data={packageData || null} />}
+                {activeTab === 'changelog' && (
+                  <ChangelogTab 
+                    changelog={changelog || null}
+                    loading={changelogLoading}
+                    error={changelogError instanceof Error ? changelogError : null}
+                    githubUrl={githubUrl}
+                  />
+                )}
+                {activeTab === 'bundle' && (
+                  <BundleAnalysisTab 
+                    stats={packageData ? analyzeBundleStats(packageData.releases, packageData.info.version) : null}
+                    releases={packageData?.releases || {}}
+                    currentVersion={packageData?.info.version || ''}
+                    loading={packageLoading}
+                  />
+                )}
               </Suspense>
             </div>
 

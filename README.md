@@ -11,6 +11,14 @@ A comprehensive production-readiness and install-risk dashboard for Python packa
 - **Compatibility Matrix**: Python version support and wheel availability across platforms
 - **Download Trends**: 30-day download history with trend analysis
 - **Security Analysis**: Vulnerability scanning via OSV database
+- **Changelog & Release Notes**: Multi-level changelog fetching with intelligent fallbacks
+  - First: Check project.urls for explicit changelog URLs
+  - Second: Fetch from GitHub repository (CHANGELOG.md, HISTORY.rst, etc.)
+  - Third: Fallback to PyPI release history
+  - Automatic parsing for breaking changes, security fixes, features, and bug fixes
+- **Bundle Analysis**: Package size analysis with wheel distributions and platform support
+- **License Compatibility**: Check license compatibility with your project's license
+- **Smart Update Recommendations**: Intelligent update suggestions based on changelog analysis
 
 ### Developer Tools
 - **Project Dependency Scanner**: Upload `requirements.txt` or `pyproject.toml` to analyze entire dependency trees
@@ -49,10 +57,25 @@ A comprehensive production-readiness and install-risk dashboard for Python packa
   - Check Python compatibility
   - Get actionable maintenance recommendations
 
+- **Dependency Conflict Resolver**: Detect and resolve version conflicts
+  - Input dependencies with version specifiers
+  - Identify incompatible package requirements
+  - Get resolution suggestions with upgrade/downgrade/pin recommendations
+
 - **Markdown Export**: Generate comprehensive package reports
   - README-ready markdown format
   - Includes health scores, installation commands, dependencies
   - Perfect for documentation and team sharing
+
+### Project Workspace
+- **Multi-Project Management**: Create and monitor multiple projects
+  - Upload requirements.txt, pyproject.toml, or Pipfile
+  - Automatic package parsing and version extraction
+  - Track outdated packages across all projects
+  - localStorage persistence for cross-session access
+  - Add packages manually with optional version specification
+  - Refresh all packages with one click
+  - Expandable project cards with package details
 
 ### Comparison & Recommendations
 - **Package Comparison**: Side-by-side comparison of two packages with detailed metrics
@@ -141,8 +164,12 @@ The production build will be in the `dist` directory.
 ### Search for a Package
 1. Enter a package name in the search bar
 2. View detailed health metrics, compatibility info, and installation options
-3. Navigate through tabs: Overview, Versions, Dependencies, Security, Compatibility, Downloads, Health, Install
-4. Export a markdown report with the "Export Markdown" button
+3. Navigate through tabs: Overview, Versions, Dependencies, Security, Compatibility, Downloads, Health, Install, Changelog, Bundle
+4. Check **Changelog** tab for breaking changes and security fixes
+5. Check **Bundle** tab for package size and install impact
+6. Review **License Compatibility** to ensure it matches your project license
+7. See **Smart Update Recommendations** when updates are available
+8. Export a markdown report with the "Export Markdown" button
 
 ### Use Developer Tools
 1. Click **"Tools"** in the header navigation
@@ -152,6 +179,15 @@ The production build will be in the `dist` directory.
    - **Requirements Generator**: Build dependency files interactively
    - **SBOM Generator**: Create Software Bill of Materials for compliance
    - **Virtual Environment Analyzer**: Check for outdated packages and issues
+   - **Dependency Conflict Resolver**: Detect version conflicts between packages
+
+### Project Workspace
+1. Click **"Projects"** in the header navigation
+2. Create a new project by clicking "New Project"
+3. Add packages manually with optional version specification
+4. Or upload `requirements.txt` or `pyproject.toml` files to auto-populate dependencies
+5. Track outdated packages across all your projects
+6. Refresh all packages with one click to check for updates
 
 ### Compare Packages
 1. Click "Compare" on any package page or go to `/compare`
@@ -203,17 +239,21 @@ src/
 ├── api/                   # API clients with caching and error handling
 │   └── pypi.ts           # PyPI, PyPIStats, and OSV API clients
 ├── components/           # React components
+│   ├── BundleAnalysisTab.tsx      # Package size and distribution analysis
+│   ├── ChangelogTab.tsx           # GitHub changelog integration
 │   ├── CompatibilityTab.tsx
+│   ├── ConflictResolver.tsx       # Dependency conflict detection and resolution
 │   ├── DependenciesTab.tsx
-│   ├── DependencyGraph.tsx     # Interactive graph visualization
+│   ├── DependencyGraph.tsx        # Interactive graph visualization
 │   ├── DownloadsTab.tsx
-│   ├── DownloadTrendComparison.tsx  # Multi-package trend charts
+│   ├── DownloadTrendComparison.tsx # Multi-package trend charts
 │   ├── ErrorDisplay.tsx
 │   ├── Header.tsx
 │   ├── HealthTab.tsx
 │   ├── InstallationTab.tsx
 │   ├── Layout.tsx
-│   ├── MarkdownExport.tsx      # Markdown report generation
+│   ├── LicenseCompatibility.tsx   # License compatibility checker
+│   ├── MarkdownExport.tsx         # Markdown report generation
 │   ├── OverviewTab.tsx
 │   ├── ProjectDependencyScanner.tsx  # File upload analysis
 │   ├── RequirementsGenerator.tsx     # Interactive file builder
@@ -221,7 +261,9 @@ src/
 │   ├── SecurityTab.tsx
 │   ├── SearchInput.tsx
 │   ├── Skeleton.tsx                  # Loading skeletons
+│   ├── SmartUpdateRecommendations.tsx # Update recommendations
 │   ├── Tabs.tsx
+│   ├── TypeStubIndicator.tsx      # Type stub availability indicator
 │   ├── VersionsTab.tsx
 │   └── VirtualEnvironmentAnalyzer.tsx # Environment analysis
 ├── contexts/             # React contexts
@@ -238,12 +280,14 @@ src/
 │   ├── ComparePage.tsx
 │   ├── HomePage.tsx
 │   ├── PackageDetailPage.tsx
-│   └── ToolsPage.tsx    # Developer tools hub
+│   ├── ProjectWorkspacePage.tsx  # Multi-project management
+│   └── ToolsPage.tsx             # Developer tools hub
 ├── providers/            # Context providers
 │   └── QueryProvider.tsx # TanStack Query provider
 ├── types/                # TypeScript definitions
 │   └── index.ts
 ├── utils/                # Utility functions
+│   ├── githubScraper.ts          # GitHub changelog and license utilities
 │   ├── index.ts
 │   ├── packageNames.ts
 │   └── suggestions.ts

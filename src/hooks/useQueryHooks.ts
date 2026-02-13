@@ -5,8 +5,9 @@ import {
   fetchDailyStats,
   fetchDependencyTree,
   fetchSecurityVulnerabilities,
+  fetchChangelog,
 } from '@/api/pypi'
-import type { PyPIPackage } from '@/types'
+import type { PyPIPackage, ChangelogData } from '@/types'
 import type { OSVVulnerability } from '@/api/pypi'
 
 // Query keys for cache management
@@ -16,6 +17,7 @@ export const queryKeys = {
   dailyStats: (name: string) => ['dailyStats', name.toLowerCase()],
   dependencies: (name: string, version?: string) => ['dependencies', name.toLowerCase(), version || 'latest'],
   security: (name: string, version?: string) => ['security', name.toLowerCase(), version || 'all'],
+  changelog: (name: string) => ['changelog', name.toLowerCase()],
 }
 
 // Hook for fetching package info with TanStack Query
@@ -98,6 +100,17 @@ export function useSecurityQuery(packageName: string | null, version?: string) {
     queryFn: () => fetchSecurityVulnerabilities(packageName!, version),
     enabled: !!packageName && packageName.length > 0,
     staleTime: 1000 * 60 * 15, // 15 minutes for security data
+  })
+}
+
+// Hook for fetching changelog
+export function useChangelogQuery(packageName: string | null, packageData: PyPIPackage | null) {
+  return useQuery<ChangelogData>({
+    queryKey: queryKeys.changelog(packageName || ''),
+    queryFn: () => fetchChangelog(packageName!, packageData!),
+    enabled: !!packageName && !!packageData && packageName.length > 0,
+    staleTime: 1000 * 60 * 30, // 30 minutes for changelog data
+    retry: 1, // Only retry once since we have fallback
   })
 }
 

@@ -25,7 +25,13 @@ import {
   Cpu,
   RefreshCw,
   Link as LinkIcon,
-  Sparkles
+  Sparkles,
+  Folder,
+  FileArchive,
+  ScrollText,
+  Scale,
+  GitBranch,
+  FileCheck
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Layout } from '@/components/Layout';
@@ -212,6 +218,40 @@ export function AboutPage() {
                   Get actionable recommendations for maintaining healthy environments.
                 </p>
               </div>
+
+              <div 
+                className="rounded-xl border p-6" 
+                style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
+              >
+                <h3 
+                  className="mb-2 flex items-center gap-2 font-semibold" 
+                  style={{ color: 'var(--text-primary)' }}
+                >
+                  <GitBranch className="h-5 w-5 text-purple-600" />
+                  Dependency Conflict Resolver
+                </h3>
+                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                  Detect and resolve version conflicts between dependencies. Input your requirements with 
+                  version specifiers to identify incompatible packages and get resolution suggestions.
+                </p>
+              </div>
+
+              <div 
+                className="rounded-xl border p-6" 
+                style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
+              >
+                <h3 
+                  className="mb-2 flex items-center gap-2 font-semibold" 
+                  style={{ color: 'var(--text-primary)' }}
+                >
+                  <Folder className="h-5 w-5 text-orange-600" />
+                  Project Workspace
+                </h3>
+                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                  Create and monitor multiple projects with their dependencies. Upload requirements.txt 
+                  or pyproject.toml files, track outdated packages, and manage all your projects in one place.
+                </p>
+              </div>
             </div>
           </section>
 
@@ -325,6 +365,74 @@ export function AboutPage() {
                 <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
                   Download package data as JSON or generate shareable links with 
                   for easy collaboration with your team.
+                </p>
+              </div>
+
+              <div 
+                className="rounded-xl border p-6" 
+                style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
+              >
+                <h3 
+                  className="mb-2 flex items-center gap-2 font-semibold" 
+                  style={{ color: 'var(--text-primary)' }}
+                >
+                  <ScrollText className="h-5 w-5 text-blue-600" />
+                  Changelog & Release Notes
+                </h3>
+                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                  Auto-fetch changelogs from GitHub repositories with smart parsing for breaking changes, 
+                  security fixes, and new features. Includes fallback to PyPI release history.
+                </p>
+              </div>
+
+              <div 
+                className="rounded-xl border p-6" 
+                style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
+              >
+                <h3 
+                  className="mb-2 flex items-center gap-2 font-semibold" 
+                  style={{ color: 'var(--text-primary)' }}
+                >
+                  <FileArchive className="h-5 w-5 text-orange-600" />
+                  Bundle Analysis
+                </h3>
+                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                  Analyze package install sizes, wheel distributions, and platform support. 
+                  Get bloat scores and understand the impact of adding dependencies to your project.
+                </p>
+              </div>
+
+              <div 
+                className="rounded-xl border p-6" 
+                style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
+              >
+                <h3 
+                  className="mb-2 flex items-center gap-2 font-semibold" 
+                  style={{ color: 'var(--text-primary)' }}
+                >
+                  <Scale className="h-5 w-5 text-green-600" />
+                  License Compatibility
+                </h3>
+                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                  Check if package licenses are compatible with your project's license. 
+                  Identifies GPL copyleft requirements and commercial restrictions.
+                </p>
+              </div>
+
+              <div 
+                className="rounded-xl border p-6" 
+                style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
+              >
+                <h3 
+                  className="mb-2 flex items-center gap-2 font-semibold" 
+                  style={{ color: 'var(--text-primary)' }}
+                >
+                  <FileCheck className="h-5 w-5 text-teal-600" />
+                  Smart Update Recommendations
+                </h3>
+                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                  Get intelligent update recommendations based on changelog analysis. 
+                  Know when it's safe to upgrade or when breaking changes require caution.
                 </p>
               </div>
 

@@ -5,6 +5,7 @@ import { DownloadTrendComparison } from '@/components/DownloadTrendComparison'
 import { RequirementsGenerator } from '@/components/RequirementsGenerator'
 import { SBOMGenerator } from '@/components/SBOMGenerator'
 import { VirtualEnvironmentAnalyzer } from '@/components/VirtualEnvironmentAnalyzer'
+import { ConflictResolver } from '@/components/ConflictResolver'
 import { 
   Scan, 
   TrendingUp, 
@@ -12,11 +13,12 @@ import {
   ArrowLeft,
   Wrench,
   FileJson,
-  Terminal
+  Terminal,
+  GitBranch
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
-type ToolId = 'scanner' | 'trends' | 'generator' | 'sbom' | 'venv-analyzer'
+type ToolId = 'scanner' | 'trends' | 'generator' | 'sbom' | 'venv-analyzer' | 'conflict-resolver'
 
 const tools = [
   {
@@ -53,6 +55,13 @@ const tools = [
     description: 'Analyze pip freeze output for outdated and vulnerable packages',
     icon: Terminal,
     component: VirtualEnvironmentAnalyzer,
+  },
+  {
+    id: 'conflict-resolver' as ToolId,
+    name: 'Dependency Conflict Resolver',
+    description: 'Detect and resolve version conflicts between dependencies',
+    icon: GitBranch,
+    component: ConflictResolver,
   },
 ]
 

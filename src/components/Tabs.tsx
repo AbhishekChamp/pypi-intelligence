@@ -10,6 +10,8 @@ const tabs: { id: TabId; label: string }[] = [
   { id: 'downloads', label: 'Downloads' },
   { id: 'health', label: 'Health' },
   { id: 'install', label: 'Install' },
+  { id: 'changelog', label: 'Changelog' },
+  { id: 'bundle', label: 'Bundle' },
 ]
 
 interface TabsProps {

@@ -157,4 +157,110 @@ export interface PackageComparison {
   downloads: [DownloadStats, DownloadStats]
 }
 
-export type TabId = 'overview' | 'versions' | 'dependencies' | 'security' | 'compatibility' | 'downloads' | 'health' | 'install'
+export type TabId = 'overview' | 'versions' | 'dependencies' | 'security' | 'compatibility' | 'downloads' | 'health' | 'install' | 'changelog' | 'bundle'
+
+// Changelog Types
+export interface ChangelogEntry {
+  version: string
+  date: string | null
+  changes: string[]
+  isBreaking: boolean
+  isSecurity: boolean
+  isFeature: boolean
+  isFix: boolean
+}
+
+export interface ChangelogData {
+  entries: ChangelogEntry[]
+  source: 'github' | 'pypi' | 'fallback'
+  error?: string
+}
+
+// Bundle Analysis Types
+export interface BundleStats {
+  totalSize: number
+  wheelSize: number
+  sourceSize: number
+  compressedSize: number
+  dependencies: number
+  transitiveDeps: number
+  hasTypeStubs: boolean
+  hasPurePythonWheel: boolean
+  hasBinaryWheel: boolean
+  platforms: string[]
+}
+
+// License Compatibility Types
+export type LicenseType = 'MIT' | 'Apache-2.0' | 'BSD-2-Clause' | 'BSD-3-Clause' | 'GPL-2.0' | 'GPL-3.0' | 'LGPL-2.1' | 'LGPL-3.0' | 'MPL-2.0' | 'ISC' | 'Unlicense' | 'CC0-1.0' | 'Proprietary' | 'Unknown'
+
+export interface LicenseCompatibility {
+  isCompatible: boolean
+  projectLicense: LicenseType
+  packageLicense: LicenseType
+  risk: 'low' | 'medium' | 'high' | 'critical'
+  explanation: string
+  requiresSourceDisclosure: boolean
+  requiresSameLicense: boolean
+}
+
+// Project Workspace Types
+export interface ProjectPackage {
+  name: string
+  version: string | null
+  specifier: string
+  latestVersion: string | null
+  outdated: boolean
+  breakingRisk: 'none' | 'low' | 'medium' | 'high'
+  healthScore: number | null
+  vulnerabilities: number
+  license: string | null
+}
+
+export interface MonitoredProject {
+  id: string
+  name: string
+  description: string
+  createdAt: string
+  updatedAt: string
+  packages: ProjectPackage[]
+  healthScore: number
+  vulnerabilityCount: number
+  outdatedCount: number
+}
+
+// Dependency Conflict Types
+export interface VersionConflict {
+  package: string
+  requiredBy: Array<{
+    package: string
+    version: string
+    specifier: string
+  }>
+  conflictType: 'direct' | 'transitive'
+  suggestedResolution: string | null
+  resolvable: boolean
+}
+
+export interface ConflictResolution {
+  conflicts: VersionConflict[]
+  suggestions: Array<{
+    action: 'upgrade' | 'downgrade' | 'pin'
+    package: string
+    targetVersion: string
+    reason: string
+  }>
+}
+
+// Smart Update Types
+export interface UpdateRecommendation {
+  package: string
+  currentVersion: string
+  latestVersion: string
+  recommendation: 'immediate' | 'safe' | 'caution' | 'hold'
+  breakingChanges: boolean
+  securityFixes: boolean
+  newFeatures: boolean
+  bugFixes: boolean
+  riskScore: number // 0-100
+  reason: string
+}
